@@ -129,9 +129,6 @@
             if (!wakeLockEnabled) {
                 noSleep.enable(); // keep the screen on!
                 wakeLockEnabled = true;
-            } else {
-                noSleep.disable(); // let the screen turn off.
-                wakeLockEnabled = false;
             }
         }, false);
 
