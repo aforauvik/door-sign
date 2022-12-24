@@ -32,6 +32,12 @@ button:hover {
 	opacity: 0.8;
 }
 
+.admin-panel {
+	margin-top: 80px;
+	border: 2px solid;
+	background: none;
+}
+
 .working-btn {
 	background-color: #86c8bc;
 }
@@ -89,6 +95,7 @@ button:hover {
 
 .admin {
 	height: 100vh;
+	display: block;
 }
 
 .selection {
@@ -97,6 +104,7 @@ button:hover {
 	align-items: center;
 	padding: 0px;
 	gap: 16px;
+	margin: 0px 120px;
 }
 
 .selection-row {
@@ -106,7 +114,6 @@ button:hover {
 	align-items: center;
 	padding: 0px;
 	gap: 16px;
-	margin: 0px 120px;
 }
 
 .message {
@@ -126,7 +133,7 @@ button:hover {
 	background: #f4f4f4;
 	border-radius: 4px;
 	padding: 32px 40px;
-	width: 512px;
+	width: 504px;
 }
 
 .working-item {
@@ -179,7 +186,7 @@ button:hover {
 }
 
 .display {
-	display: flex;
+	display: none;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;

@@ -6,6 +6,12 @@ let recording = document.querySelector(".record-btn");
 const message = document.querySelector(".display-h1");
 const title = document.querySelector(".display-h2");
 const signView = document.querySelector(".display");
+const adminPanel = document.querySelector(".admin");
+
+function adminPanelView() {
+	signView.style.display = "none";
+	adminPanel.style.display = "block";
+}
 
 function buttonStatusOn() {
 	working.textContent = "Turn On";
@@ -34,11 +40,13 @@ function workingSign() {
 		title.textContent = "Working";
 		message.textContent = "Knock before you enter";
 		message.style.width = "612px";
-		working.textContent = "Turn Off";
+		// working.textContent = "Turn Off";
 		video.textContent = "Turn On";
 		audio.textContent = "Turn On";
 		recording.textContent = "Turn On";
 		signView.style.background = "#252525";
+		adminPanel.style.display = "none";
+		signView.style.display = "flex";
 	} else {
 		defaultMessage();
 	}
@@ -49,11 +57,13 @@ function videoSign() {
 		title.textContent = "Quiet Please";
 		message.textContent = "video meeting in progress";
 		message.style.width = "630px";
-		video.textContent = "Turn Off";
+		// video.textContent = "Turn Off";
 		working.textContent = "Turn On";
 		audio.textContent = "Turn On";
 		recording.textContent = "Turn On";
 		signView.style.background = "#FF9494";
+		adminPanel.style.display = "none";
+		signView.style.display = "flex";
 	} else {
 		defaultMessage();
 	}
@@ -64,11 +74,13 @@ function audioSign() {
 		title.textContent = "Quiet Please";
 		message.textContent = "audio meeting in progress";
 		message.style.width = "650px";
-		audio.textContent = "Turn Off";
+		// audio.textContent = "Turn Off";
 		working.textContent = "Turn On";
 		video.textContent = "Turn On";
 		recording.textContent = "Turn On";
 		signView.style.background = "#FFC090";
+		adminPanel.style.display = "none";
+		signView.style.display = "flex";
 	} else {
 		defaultMessage();
 	}
@@ -79,11 +91,13 @@ function recordSign() {
 		title.textContent = "Quiet Please";
 		message.textContent = "recording in progress";
 		message.style.width = "525px";
-		recording.textContent = "Turn Off";
+		// recording.textContent = "Turn Off";
 		working.textContent = "Turn On";
 		video.textContent = "Turn On";
 		audio.textContent = "Turn On";
 		signView.style.background = "#FF7D7D";
+		adminPanel.style.display = "none";
+		signView.style.display = "flex";
 	} else {
 		defaultMessage();
 	}
