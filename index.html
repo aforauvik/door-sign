@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+
+
+    <title>Door Sign</title>
+</head>
+
+<body>
+
+    <section class="display">
+
+        <div class="content">
+
+            <h2 class="display-h2" id="title">Doing Nothing</h2>
+            <h1 class="display-h1" id="message">Enter At Will</h1>
+            <!-- <h3 class="display-h3" id="time">Ends at 05:00 PM</h3> -->
+
+        </div>
+
+    </section>
+
+    <section class="admin">
+
+        <section class="hero">
+
+
+
+
+            <div class="hero-text">
+
+                <h2 class="admin-h2">Digital Door Sign</h2>
+                <h3 class="admin-h3">Prevent home office interruptions</h3>
+
+            </div>
+
+            <div class="hero-illustration">
+                <img src="/assets/hero-illustration.svg" alt="" srcset="">
+            </div>
+
+
+        </section>
+
+        <section class="selection">
+
+            <div class="selection-row">
+
+
+                <div class="selection-item working-section">
+
+                    <div class="message">
+                        <h3 class="admin-h3">Working</h3>
+                        <p>Please knock</p>
+                    </div>
+
+                    <div class="button">
+                        <button onclick="workingSign()" class="working-btn">Turn On</button>
+                    </div>
+
+                </div>
+
+                <div class="selection-item video-section">
+
+                    <div class="message">
+                        <h3 class="admin-h3">Video Meeting</h3>
+                        <p>Video meeting in progress</p>
+                    </div>
+
+                    <div class="button">
+                        <button onclick="videoSign()" class="video-btn">Turn On</button>
+                    </div>
+
+                </div>
+            </div>
+            <div class="selection-row">
+
+
+                <div class="selection-item audio-section">
+
+                    <div class="message">
+                        <h3 class="admin-h3">Audio Meeting</h3>
+                        <p>Audio meeting in progress</p>
+                    </div>
+
+                    <div class="button">
+                        <button onclick="audioSign()" class="audio-btn">Turn On</button>
+                    </div>
+
+                </div>
+
+                <div class="selection-item recording-section">
+
+                    <div class="message">
+                        <h3 class="admin-h3">Recording</h3>
+                        <p>Recording in progress</p>
+                    </div>
+
+                    <div class="button">
+                        <button onclick="recordSign()" class="record-btn">Turn On</button>
+                    </div>
+
+                </div>
+            </div>
+
+
+        </section>
+
+    </section>
+
+    <script src="/app.js"></script>
+
+</body>
+
+</html>
