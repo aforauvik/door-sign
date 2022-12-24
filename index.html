@@ -124,7 +124,7 @@
         var noSleep = new NoSleep();
 
         var wakeLockEnabled = false;
-        var toggleEl = document.querySelector("button");
+        var toggleEl = document.querySelector(".working-btn");
         toggleEl.addEventListener('click', function () {
             if (!wakeLockEnabled) {
                 noSleep.enable(); // keep the screen on!
