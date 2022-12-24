@@ -10,10 +10,6 @@ body {
 }
 
 button {
-	display: flex;
-	flex-direction: row;
-	justify-content: center;
-	align-items: center;
 	padding: 16px 24px;
 	font-family: "Open Sans";
 	font-style: normal;
@@ -39,6 +35,18 @@ button:hover {
 }
 
 .working-btn {
+	padding: 16px 24px;
+	font-family: "Open Sans";
+	font-style: normal;
+	font-weight: 700;
+	font-size: 16px;
+	line-height: 22px;
+	text-align: center;
+	text-transform: capitalize;
+	border: none;
+	border-radius: 4px;
+	color: #ffffff;
+	cursor: pointer;
 	background-color: #86c8bc;
 }
 .video-btn {
