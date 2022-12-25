@@ -37,9 +37,9 @@ function defaultMessage() {
 
 function workingSign() {
 	if (working.textContent === "Turn On") {
-		title.textContent = "Working";
-		message.textContent = "Knock before you enter";
-		message.style.width = "612px";
+		title.textContent = "Busy";
+		message.textContent = "Do not disturb please";
+		message.style.width = "345px";
 		// working.textContent = "Turn Off";
 		video.textContent = "Turn On";
 		audio.textContent = "Turn On";
