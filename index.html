@@ -62,7 +62,7 @@
                     </div>
 
                     <div class="button">
-                        <button onclick="workingSign()" class="working-btn">Turn On</button>
+                        <button onclick="workingSign(), stopSleep()" class="working-btn">Turn On</button>
                     </div>
 
                 </div>
@@ -75,7 +75,7 @@
                     </div>
 
                     <div class="button">
-                        <button onclick="videoSign()" class="video-btn">Turn On</button>
+                        <button onclick="videoSign(), stopSleep()" class="video-btn">Turn On</button>
                     </div>
 
                 </div>
@@ -91,7 +91,7 @@
                     </div>
 
                     <div class="button">
-                        <button onclick="audioSign()" class="audio-btn">Turn On</button>
+                        <button onclick="audioSign(), stopSleep()" class="audio-btn">Turn On</button>
                     </div>
 
                 </div>
@@ -104,7 +104,7 @@
                     </div>
 
                     <div class="button">
-                        <button onclick="recordSign()" class="record-btn">Turn On</button>
+                        <button onclick="recordSign(), stopSleep()" class="record-btn">Turn On</button>
                     </div>
 
                 </div>
@@ -124,13 +124,12 @@
         var noSleep = new NoSleep();
 
         var wakeLockEnabled = false;
-        var toggleEl = document.querySelector(".working-btn");
-        toggleEl.addEventListener('click', function () {
+        function stopSleep() {
             if (!wakeLockEnabled) {
                 noSleep.enable(); // keep the screen on!
                 wakeLockEnabled = true;
             }
-        }, false);
+        };
 
     </script>
 
