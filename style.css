@@ -54,7 +54,8 @@ button:hover {
 	align-items: center;
 	background: #f4f4f4;
 	border-radius: 4px;
-	margin: 16px 120px;
+	margin: 0 120px;
+	margin-bottom: 16px;
 	padding: 0 40px;
 }
 
