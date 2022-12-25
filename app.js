@@ -20,13 +20,6 @@ function buttonStatusOn() {
 	recording.textContent = "Turn On";
 }
 
-function buttonStatusOff() {
-	working.textContent = "Turn Off";
-	video.textContent = "Turn Off";
-	audio.textContent = "Turn Off";
-	recording.textContent = "Turn Off";
-}
-
 function defaultMessage() {
 	buttonStatusOn();
 	title.textContent = "Doing nothing";
