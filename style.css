@@ -135,6 +135,10 @@ button:hover {
 	border-radius: 4px;
 	padding: 32px 40px;
 	width: 521px;
+	cursor: pointer;
+}
+.selection-item:hover {
+	opacity: 0.8;
 }
 
 .working-item {
