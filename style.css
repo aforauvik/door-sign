@@ -29,6 +29,15 @@ button:hover {
 	opacity: 0.8;
 }
 
+a {
+	text-decoration: none;
+	color: #1a1a1a;
+	font-weight: 600;
+}
+a:hover {
+	color: #e97777;
+}
+
 .admin-panel {
 	margin-top: 80px;
 	border: 2px solid;
@@ -206,4 +215,15 @@ button:hover {
 	align-items: center;
 	padding: 0px;
 	gap: 16px;
+}
+
+.copyright {
+	font-family: "Open Sans";
+	font-style: normal;
+	font-weight: 400;
+	font-size: 12px;
+	line-height: 16px;
+	text-align: center;
+	color: #1a1a1a;
+	margin-top: 48px;
 }
