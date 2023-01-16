@@ -10,7 +10,7 @@ const adminPanel = document.querySelector(".admin");
 
 function adminPanelView() {
 	signView.style.display = "none";
-	adminPanel.style.display = "flex";
+	adminPanel.style.display = "block";
 }
 
 function buttonStatusOn() {

@@ -35,100 +35,90 @@
 
     <section class="admin">
 
-        <section>
+        <section class="hero">
 
-            <section class="hero">
+            <div class="hero-text">
 
-                <div class="hero-text">
+                <h2 class="admin-h2">Digital Door Sign</h2>
+                <h3 class="admin-h3">Prevent home office interruptions</h3>
 
-                    <h2 class="admin-h2">Digital Door Sign</h2>
-                    <h3 class="admin-h3">Prevent home office interruptions</h3>
+            </div>
 
-                </div>
+            <div class="hero-illustration">
+                <img src="/assets/hero-illustration.svg" alt="" srcset="">
+            </div>
 
-                <div class="hero-illustration">
-                    <img src="/assets/hero-illustration.svg" alt="" srcset="">
-                </div>
-
-
-            </section>
-
-            <section class="selection">
-
-                <div class="selection-row">
-
-
-                    <div onclick="workingSign(), stopSleep()" class="selection-item working-section">
-
-                        <div class="message">
-                            <h3 class="admin-h3">Busy</h3>
-                            <p>Do not disturb</p>
-                        </div>
-
-                        <div class="button">
-                            <button onclick="workingSign(), stopSleep()" class="working-btn">Turn On</button>
-                        </div>
-
-                    </div>
-
-                    <div onclick="videoSign(), stopSleep()" class="selection-item video-section">
-
-                        <div class="message">
-                            <h3 class="admin-h3">Video Meeting</h3>
-                            <p>Video meeting in progress</p>
-                        </div>
-
-                        <div class="button">
-                            <button onclick="videoSign(), stopSleep()" class="video-btn">Turn On</button>
-                        </div>
-
-                    </div>
-                </div>
-                <div class="selection-row">
-
-
-                    <div onclick="audioSign(), stopSleep()" class="selection-item audio-section">
-
-                        <div class="message">
-                            <h3 class="admin-h3">Audio Meeting</h3>
-                            <p>Audio meeting in progress</p>
-                        </div>
-
-                        <div class="button">
-                            <button onclick="audioSign(), stopSleep()" class="audio-btn">Turn On</button>
-                        </div>
-
-                    </div>
-
-                    <div onclick="recordSign(), stopSleep()" class="selection-item recording-section">
-
-                        <div class="message">
-                            <h3 class="admin-h3">Recording</h3>
-                            <p>Recording in progress</p>
-                        </div>
-
-                        <div class="button">
-                            <button onclick="recordSign(), stopSleep()" class="record-btn">Turn On</button>
-                        </div>
-
-                    </div>
-                </div>
-
-
-
-            </section>
 
         </section>
 
-        <section>
-            <p class="copyright">Designed and developed in California by <a href="https://www.mousepotato.co/"
-                    target="_blank">Mouse
-                    Potato
-                    Lab</a></p>
+        <section class="selection">
+
+            <div class="selection-row">
+
+
+                <div onclick="workingSign(), stopSleep()" class="selection-item working-section">
+
+                    <div class="message">
+                        <h3 class="admin-h3">Busy</h3>
+                        <p>Do not disturb</p>
+                    </div>
+
+                    <div class="button">
+                        <button onclick="workingSign(), stopSleep()" class="working-btn">Turn On</button>
+                    </div>
+
+                </div>
+
+                <div onclick="videoSign(), stopSleep()" class="selection-item video-section">
+
+                    <div class="message">
+                        <h3 class="admin-h3">Video Meeting</h3>
+                        <p>Video meeting in progress</p>
+                    </div>
+
+                    <div class="button">
+                        <button onclick="videoSign(), stopSleep()" class="video-btn">Turn On</button>
+                    </div>
+
+                </div>
+            </div>
+            <div class="selection-row">
+
+
+                <div onclick="audioSign(), stopSleep()" class="selection-item audio-section">
+
+                    <div class="message">
+                        <h3 class="admin-h3">Audio Meeting</h3>
+                        <p>Audio meeting in progress</p>
+                    </div>
+
+                    <div class="button">
+                        <button onclick="audioSign(), stopSleep()" class="audio-btn">Turn On</button>
+                    </div>
+
+                </div>
+
+                <div onclick="recordSign(), stopSleep()" class="selection-item recording-section">
+
+                    <div class="message">
+                        <h3 class="admin-h3">Recording</h3>
+                        <p>Recording in progress</p>
+                    </div>
+
+                    <div class="button">
+                        <button onclick="recordSign(), stopSleep()" class="record-btn">Turn On</button>
+                    </div>
+
+                </div>
+            </div>
+
+
 
         </section>
 
-
+        <p class="copyright">Designed and developed in California by <a href="https://www.mousepotato.co/"
+                target="_blank">Mouse Potato
+                Lab</a></p>
 
     </section>
 
