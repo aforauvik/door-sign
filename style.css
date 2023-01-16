@@ -10,6 +10,7 @@ body {
 	margin: auto;
 	height: 100vh;
 	width: 100%;
+	display: flex;
 }
 
 button {
@@ -114,7 +115,9 @@ a:hover {
 	max-width: 1200px;
 	padding: 0 120px;
 	height: 100vh;
-	display: block;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
 }
 
 .selection {
@@ -240,5 +243,5 @@ a:hover {
 	line-height: 16px;
 	text-align: center;
 	color: #c6c6c6;
-	margin-top: 48px;
+	margin-bottom: 16px;
 }
