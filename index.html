@@ -20,107 +20,123 @@
 
 <body>
 
-    <section class="display">
+    <section class="everything">
 
-        <div class="content">
+        <section class="door-sign">
 
-            <h2 class="display-h2" id="title">Doing Nothing</h2>
-            <h1 class="display-h1" id="message">Enter At Will</h1>
-            <!-- <h3 class="display-h3" id="time">Ends at 05:00 PM</h3> -->
-            <button onclick="adminPanelView()" class="admin-panel">Turn Off</button>
+            <section class="display">
 
-        </div>
+                <div class="content">
 
-    </section>
+                    <h2 class="display-h2" id="title">Doing Nothing</h2>
+                    <h1 class="display-h1" id="message">Enter At Will</h1>
+                    <!-- <h3 class="display-h3" id="time">Ends at 05:00 PM</h3> -->
+                    <button onclick="adminPanelView()" class="admin-panel">Turn Off</button>
 
-    <section class="admin">
+                </div>
 
-        <section class="hero">
+            </section>
 
-            <div class="hero-text">
+            <section class="admin">
 
-                <h2 class="admin-h2">Digital Door Sign</h2>
-                <h3 class="admin-h3">Prevent home office interruptions</h3>
+                <section class="hero">
 
-            </div>
+                    <div class="hero-text">
 
-            <div class="hero-illustration">
-                <img src="/assets/hero-illustration.svg" alt="" srcset="">
-            </div>
+                        <h2 class="admin-h2">Digital Door Sign</h2>
+                        <h3 class="admin-h3">Prevent home office interruptions</h3>
 
+                    </div>
+
+                    <div class="hero-illustration">
+                        <img src="/assets/hero-illustration.svg" alt="" srcset="">
+                    </div>
+
+
+                </section>
+
+                <section class="selection">
+
+                    <div class="selection-row">
+
+
+                        <div onclick="workingSign(), stopSleep()" class="selection-item working-section">
+
+                            <div class="message">
+                                <h3 class="admin-h3">Busy</h3>
+                                <p>Do not disturb</p>
+                            </div>
+
+                            <div class="button">
+                                <button onclick="workingSign(), stopSleep()" class="working-btn">Turn On</button>
+                            </div>
+
+                        </div>
+
+                        <div onclick="videoSign(), stopSleep()" class="selection-item video-section">
+
+                            <div class="message">
+                                <h3 class="admin-h3">Video Meeting</h3>
+                                <p>Video meeting in progress</p>
+                            </div>
+
+                            <div class="button">
+                                <button onclick="videoSign(), stopSleep()" class="video-btn">Turn On</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="selection-row">
+
+
+                        <div onclick="audioSign(), stopSleep()" class="selection-item audio-section">
+
+                            <div class="message">
+                                <h3 class="admin-h3">Audio Meeting</h3>
+                                <p>Audio meeting in progress</p>
+                            </div>
+
+                            <div class="button">
+                                <button onclick="audioSign(), stopSleep()" class="audio-btn">Turn On</button>
+                            </div>
+
+                        </div>
+
+                        <div onclick="recordSign(), stopSleep()" class="selection-item recording-section">
+
+                            <div class="message">
+                                <h3 class="admin-h3">Recording</h3>
+                                <p>Recording in progress</p>
+                            </div>
+
+                            <div class="button">
+                                <button onclick="recordSign(), stopSleep()" class="record-btn">Turn On</button>
+                            </div>
+
+                        </div>
+                    </div>
+
+
+
+                </section>
+
+
+
+            </section>
 
         </section>
 
-        <section class="selection">
-
-            <div class="selection-row">
-
-
-                <div onclick="workingSign(), stopSleep()" class="selection-item working-section">
-
-                    <div class="message">
-                        <h3 class="admin-h3">Busy</h3>
-                        <p>Do not disturb</p>
-                    </div>
-
-                    <div class="button">
-                        <button onclick="workingSign(), stopSleep()" class="working-btn">Turn On</button>
-                    </div>
-
-                </div>
-
-                <div onclick="videoSign(), stopSleep()" class="selection-item video-section">
-
-                    <div class="message">
-                        <h3 class="admin-h3">Video Meeting</h3>
-                        <p>Video meeting in progress</p>
-                    </div>
-
-                    <div class="button">
-                        <button onclick="videoSign(), stopSleep()" class="video-btn">Turn On</button>
-                    </div>
-
-                </div>
-            </div>
-            <div class="selection-row">
-
-
-                <div onclick="audioSign(), stopSleep()" class="selection-item audio-section">
-
-                    <div class="message">
-                        <h3 class="admin-h3">Audio Meeting</h3>
-                        <p>Audio meeting in progress</p>
-                    </div>
-
-                    <div class="button">
-                        <button onclick="audioSign(), stopSleep()" class="audio-btn">Turn On</button>
-                    </div>
-
-                </div>
-
-                <div onclick="recordSign(), stopSleep()" class="selection-item recording-section">
-
-                    <div class="message">
-                        <h3 class="admin-h3">Recording</h3>
-                        <p>Recording in progress</p>
-                    </div>
-
-                    <div class="button">
-                        <button onclick="recordSign(), stopSleep()" class="record-btn">Turn On</button>
-                    </div>
-
-                </div>
-            </div>
-
-
+        <section class="bottom-title">
+            <p class="copyright">Designed and developed in North Carolina by <a href="https://auvik.me"
+                    target="_blank">Auvik
+                    Mir
+                </a></p>
 
         </section>
 
-        <p class="copyright">Designed and developed in California by <a href="https://www.mousepotato.co/"
-                target="_blank">Mouse Potato
-                Lab</a></p>
-
     </section>
+
+
 
 
 

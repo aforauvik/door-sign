@@ -12,6 +12,13 @@ body {
 	width: 100%;
 }
 
+.everything {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	height: 100vh;
+}
+
 button {
 	padding: 16px 60px;
 	font-family: "Open Sans";
@@ -113,7 +120,7 @@ a:hover {
 	margin: auto;
 	max-width: 1200px;
 	padding: 0 120px;
-	height: 100vh;
+	/* height: 100vh; */
 	display: block;
 }
 
@@ -173,12 +180,12 @@ a:hover {
 	font-family: "Open Sans";
 	font-style: normal;
 	font-weight: 700;
-	font-size: 80px;
-	line-height: 88px;
+	font-size: 5vw;
+	line-height: 5vw;
 	text-align: center;
 	text-transform: uppercase;
 	color: #ffffff;
-	width: 350px;
+	width: 55%;
 }
 
 .display-h2 {
@@ -233,6 +240,7 @@ a:hover {
 }
 
 .copyright {
+	display: block;
 	font-family: "Open Sans";
 	font-style: normal;
 	font-weight: 400;
@@ -240,5 +248,5 @@ a:hover {
 	line-height: 16px;
 	text-align: center;
 	color: #c6c6c6;
-	margin-top: 48px;
+	margin-bottom: 16px;
 }
