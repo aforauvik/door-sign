@@ -7,12 +7,12 @@ const message = document.querySelector(".display-h1");
 const title = document.querySelector(".display-h2");
 const signView = document.querySelector(".display");
 const adminPanel = document.querySelector(".admin");
-const copyright = document.querySelector(".copyright");
+const copyright = document.querySelector(".bottom-title");
 
 function adminPanelView() {
 	signView.style.display = "none";
 	adminPanel.style.display = "block";
-	copyright.style.display = "block";
+	copyright.style.display = "flex";
 }
 
 function buttonStatusOn() {
