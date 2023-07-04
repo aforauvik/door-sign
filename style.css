@@ -250,3 +250,10 @@ a:hover {
 	color: #c6c6c6;
 	margin-bottom: 16px;
 }
+
+.bottom-title {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 24px;
+}
