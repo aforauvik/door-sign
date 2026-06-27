@@ -196,7 +196,7 @@ export function LoginForm({className, googleClientId, ...props}) {
 						>
 							<svg
 								className="w-[18px] h-[18px] shrink-0 text-black"
-								viewBox=""
+								viewBox="0 0 16 16"
 								fill="currentColor"
 								aria-hidden="true"
 								focusable="false"
