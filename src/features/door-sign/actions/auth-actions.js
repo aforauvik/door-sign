@@ -30,6 +30,45 @@ export async function signInWithOAuthAction(provider) {
   }
 }
 
+export async function signInWithIdTokenAction(idToken) {
+  try {
+    const supabase = await getSupabaseAuthClient();
+    const { data, error } = await supabase.auth.signInWithIdToken({
+      provider: "google",
+      token: idToken,
+    });
+
+    if (error) {
+      console.error("signInWithIdToken error:", error);
+      return { success: false, error: error.message };
+    }
+
+    if (data?.session) {
+      const cookieStore = await cookies();
+      cookieStore.set("sb-access-token", data.session.access_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: data.session.expires_in,
+      });
+      cookieStore.set("sb-refresh-token", data.session.refresh_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 30 * 24 * 60 * 60, // 30 days
+      });
+      return { success: true };
+    }
+
+    return { success: false, error: "Authentication failed. No session returned." };
+  } catch (err) {
+    console.error("signInWithIdToken exception:", err);
+    return { success: false, error: err.message };
+  }
+}
+
 export async function signUpAction(email, password) {
   try {
     const supabase = await getSupabaseAuthClient();

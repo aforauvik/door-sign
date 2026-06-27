@@ -222,7 +222,7 @@ export function DoorSignControl({
 				</div>
 				<div className="flex items-center gap-2">
 					<Button
-						className="px-4 py-5 text-sm font-semibold bg-emerald-500/10 border-emerald-500/30 hover:bg-emerald-500/30 hover:border-emerald-500/30 transition-all duration-500 border-1 text-white"
+						className="px-4 py-5 text-sm font-semibold dark:text-white text-emerald-600 bg-emerald-500/10 border-emerald-500/30 hover:bg-emerald-500/30 hover:border-emerald-500/30 transition-all duration-500 border-1"
 						onClick={handleDirectLaunch}
 					>
 						<Icons.DoorClosed className="h-4 w-4" />
