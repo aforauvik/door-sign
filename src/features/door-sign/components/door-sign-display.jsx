@@ -270,7 +270,7 @@ export function DoorSignDisplay({state, currentPreset, onUnlock}) {
 							style={{animationDuration: "2s"}}
 						/>
 						<span className="text-2xl">
-							Available After/At:{" "}
+							Available After:{" "}
 							<span className={`font-bold ${valueColorClass}`}>
 								{state.finishTime}
 							</span>
