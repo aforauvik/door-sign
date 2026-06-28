@@ -200,7 +200,7 @@ export function DoorSignControl({
 		<div
 			className={`flex flex-col min-h-screen font-sans p-6 md:p-12 transition-colors duration-300 ${containerClass}`}
 		>
-			<header className="max-w-5xl mx-auto w-full mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+			<header className="max-w-5xl mx-auto w-full mb-8 flex flex-row items-center justify-between gap-4">
 				<div>
 					<div className="flex items-center gap-2">
 						{/* <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" /> */}
@@ -209,9 +209,10 @@ export function DoorSignControl({
 							alt="Knock Later Logo"
 							width={40}
 							height={40}
+							className="h-8 w-8"
 						/>
 						<h1
-							className={`text-2xl ml-1 font-bold tracking-tight ${headerTextClass}`}
+							className={`text-lg ml-1 font-bold tracking-tight hidden md:block ${headerTextClass}`}
 						>
 							Knock Later
 						</h1>
@@ -347,7 +348,7 @@ export function DoorSignControl({
 							Add Preset
 						</Button>
 					</div>
-					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+					<div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-4">
 						{defaultPresets.map((preset) => {
 							const isActive = selectedId === preset.id;
 
@@ -355,7 +356,7 @@ export function DoorSignControl({
 								<Card
 									key={preset.id}
 									onClick={() => handleStatusSelect(preset.id)}
-									className={`relative cursor-pointer rounded-2xl border flex gap-8 transition-all duration-200 flex flex-col justify-between p-4 overflow-hidden select-none ${
+									className={`relative cursor-pointer rounded-2xl border flex flex-col justify-between p-4 overflow-hidden select-none h-[160px] transition-all duration-200 ${
 										isActive
 											? "border-emerald-500 bg-emerald-500/5 ring-1 ring-emerald-500/20"
 											: isLight
@@ -397,6 +398,17 @@ export function DoorSignControl({
 
 									{/* Bottom-left: Stacked Title & Subtitle */}
 									<div className="flex flex-col text-left gap-1 mt-auto">
+										{isActive && (
+											<span className="text-[10px] uppercase font-bold tracking-wider text-emerald-500 flex items-center gap-1.5 mb-0.5 flex-wrap">
+												<span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+												Active
+												{state.finishTime && preset.id !== "available" && (
+													<span className="normal-case font-semibold text-emerald-600 dark:text-emerald-400/90 ml-1">
+														• Until {state.finishTime}
+													</span>
+												)}
+											</span>
+										)}
 										<span
 											className={`font-semibold text-sm leading-tight transition-colors ${
 												isActive
@@ -432,7 +444,7 @@ export function DoorSignControl({
 									Custom Presets
 								</h2>
 							</div>
-							<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+							<div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-4">
 								{customPresets.map((preset) => {
 									const isActive = selectedId === preset.id;
 
@@ -440,7 +452,7 @@ export function DoorSignControl({
 										<Card
 											key={preset.id}
 											onClick={() => handleStatusSelect(preset.id)}
-											className={`relative cursor-pointer rounded-2xl border flex gap-8 transition-all duration-200 flex flex-col justify-between p-4 overflow-hidden select-none ${
+											className={`relative cursor-pointer rounded-2xl border flex flex-col justify-between p-4 overflow-hidden select-none h-[160px] transition-all duration-200 ${
 												isActive
 													? "border-emerald-500 bg-emerald-500/5 ring-1 ring-emerald-500/20"
 													: isLight
@@ -482,6 +494,17 @@ export function DoorSignControl({
 
 											{/* Bottom-left: Stacked Title & Subtitle */}
 											<div className="flex flex-col text-left gap-1 mt-auto">
+												{isActive && (
+													<span className="text-[10px] uppercase font-bold tracking-wider text-emerald-500 flex items-center gap-1.5 mb-0.5 flex-wrap">
+														<span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+														Active
+														{state.finishTime && preset.id !== "available" && (
+															<span className="normal-case font-semibold text-emerald-600 dark:text-emerald-400/90 ml-1">
+																• Until {state.finishTime}
+															</span>
+														)}
+													</span>
+												)}
 												<span
 													className={`font-semibold text-sm leading-tight transition-colors ${
 														isActive
@@ -850,8 +873,18 @@ function PresetEditDialog({
 
 	const handleSave = () => {
 		const trimmedTitle = title.trim();
-		if (preset?.isCustom && !trimmedTitle) {
-			setError("Title is required.");
+		if (preset?.isCustom) {
+			if (!trimmedTitle) {
+				setError("Title is required.");
+				return;
+			}
+			if (trimmedTitle.length > 20) {
+				setError("Title must be 20 characters or less.");
+				return;
+			}
+		}
+		if (subtext.trim().length > 75) {
+			setError("Subtext must be 75 characters or less.");
 			return;
 		}
 		onSave(subtext, trimmedTitle);
@@ -896,9 +929,15 @@ function PresetEditDialog({
 				<div className="space-y-4 py-4">
 					{preset?.isCustom && (
 						<div className="space-y-2">
-							<label className={modalLabelClass}>Preset Title</label>
+							<div className="flex justify-between items-center">
+								<label className={modalLabelClass}>Preset Title</label>
+								<span className={`text-[10px] font-medium ${title.length > 20 ? "text-red-500" : isLight ? "text-zinc-400" : "text-zinc-550"}`}>
+									{title.length}/20
+								</span>
+							</div>
 							<Input
 								type="text"
+								maxLength={20}
 								value={title}
 								onChange={(e) => {
 									setTitle(e.target.value);
@@ -912,9 +951,15 @@ function PresetEditDialog({
 					)}
 
 					<div className="space-y-2">
-						<label className={modalLabelClass}>Custom Subtext</label>
+						<div className="flex justify-between items-center">
+							<label className={modalLabelClass}>Custom Subtext</label>
+							<span className={`text-[10px] font-medium ${subtext.length > 75 ? "text-red-500" : isLight ? "text-zinc-400" : "text-zinc-550"}`}>
+								{subtext.length}/75
+							</span>
+						</div>
 						<Input
 							type="text"
+							maxLength={75}
 							value={subtext}
 							onChange={(e) => setSubtext(e.target.value)}
 							placeholder={`e.g. Writing code. (Default: "${preset?.defaultSubText}")`}
@@ -986,6 +1031,14 @@ function AddPresetDialog({isOpen, onClose, isLight, onSave}) {
 			setError("Title is required.");
 			return;
 		}
+		if (trimmedTitle.length > 20) {
+			setError("Title must be 20 characters or less.");
+			return;
+		}
+		if (subtext.trim().length > 75) {
+			setError("Subtext must be 75 characters or less.");
+			return;
+		}
 		onSave({
 			label: trimmedTitle,
 			defaultSubText: subtext.trim() || "Please do not disturb.",
@@ -1026,9 +1079,15 @@ function AddPresetDialog({isOpen, onClose, isLight, onSave}) {
 
 				<div className="space-y-4 py-4">
 					<div className="space-y-2">
-						<label className={modalLabelClass}>Preset Title</label>
+						<div className="flex justify-between items-center">
+							<label className={modalLabelClass}>Preset Title</label>
+							<span className={`text-[10px] font-medium ${title.length > 20 ? "text-red-500" : isLight ? "text-zinc-400" : "text-zinc-550"}`}>
+								{title.length}/20
+							</span>
+						</div>
 						<Input
 							type="text"
+							maxLength={20}
 							value={title}
 							onChange={(e) => {
 								setTitle(e.target.value);
@@ -1041,9 +1100,15 @@ function AddPresetDialog({isOpen, onClose, isLight, onSave}) {
 					</div>
 
 					<div className="space-y-2">
-						<label className={modalLabelClass}>Default Subtext</label>
+						<div className="flex justify-between items-center">
+							<label className={modalLabelClass}>Default Subtext</label>
+							<span className={`text-[10px] font-medium ${subtext.length > 75 ? "text-red-500" : isLight ? "text-zinc-400" : "text-zinc-550"}`}>
+								{subtext.length}/75
+							</span>
+						</div>
 						<Input
 							type="text"
+							maxLength={75}
 							value={subtext}
 							onChange={(e) => setSubtext(e.target.value)}
 							placeholder="e.g. Having lunch. Back soon!"

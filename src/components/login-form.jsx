@@ -20,6 +20,7 @@ import {useEffect} from "react";
 export function LoginForm({className, googleClientId, ...props}) {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
+	const [googleLibraryLoaded, setGoogleLibraryLoaded] = useState(false);
 
 	useEffect(() => {
 		if (!googleClientId) {
@@ -29,39 +30,54 @@ export function LoginForm({className, googleClientId, ...props}) {
 			return;
 		}
 
+		let initialized = false;
+		let interval;
+
 		const initGoogleSignIn = () => {
 			if (typeof window !== "undefined" && window.google) {
 				try {
-					window.google.accounts.id.initialize({
-						client_id: googleClientId,
-						callback: async (response) => {
-							setLoading(true);
-							setError("");
-							try {
-								const res = await signInWithIdTokenAction(response.credential);
-								if (res.success) {
-									window.location.href = "/";
-								} else {
-									setError(res.error || "Failed to sign in with Google.");
+					const container = document.getElementById("google-signin-btn-container");
+					if (!container) return;
+
+					container.innerHTML = "";
+
+					const containerWidth = container.clientWidth || 336;
+					const clampedWidth = Math.max(200, Math.min(400, containerWidth));
+
+					if (!initialized) {
+						window.google.accounts.id.initialize({
+							client_id: googleClientId,
+							callback: async (response) => {
+								setLoading(true);
+								setError("");
+								try {
+									const res = await signInWithIdTokenAction(response.credential);
+									if (res.success) {
+										window.location.href = "/";
+									} else {
+										setError(res.error || "Failed to sign in with Google.");
+										setLoading(false);
+									}
+								} catch (err) {
+									setError("An unexpected error occurred during Google sign-in.");
 									setLoading(false);
 								}
-							} catch (err) {
-								setError("An unexpected error occurred during Google sign-in.");
-								setLoading(false);
-							}
-						},
-					});
+							},
+						});
+						initialized = true;
+					}
 
 					window.google.accounts.id.renderButton(
-						document.getElementById("google-signin-btn-container"),
+						container,
 						{
 							theme: "outline",
 							size: "large",
-							width: "336",
+							width: clampedWidth.toString(),
 							text: "continue_with",
 							shape: "rectangular",
 						},
 					);
+					setGoogleLibraryLoaded(true);
 				} catch (e) {
 					console.error("Error initializing Google Identity Services:", e);
 				}
@@ -72,7 +88,7 @@ export function LoginForm({className, googleClientId, ...props}) {
 			initGoogleSignIn();
 		} else {
 			let attempts = 0;
-			const interval = setInterval(() => {
+			interval = setInterval(() => {
 				attempts++;
 				if (window.google) {
 					clearInterval(interval);
@@ -82,8 +98,22 @@ export function LoginForm({className, googleClientId, ...props}) {
 					console.error("Google Client library (gsi/client) failed to load.");
 				}
 			}, 100);
-			return () => clearInterval(interval);
 		}
+
+		let resizeTimeout;
+		const handleResize = () => {
+			clearTimeout(resizeTimeout);
+			resizeTimeout = setTimeout(() => {
+				initGoogleSignIn();
+			}, 150);
+		};
+
+		window.addEventListener("resize", handleResize);
+		return () => {
+			if (interval) clearInterval(interval);
+			window.removeEventListener("resize", handleResize);
+			clearTimeout(resizeTimeout);
+		};
 	}, [googleClientId]);
 
 	const handleOAuthLogin = async (provider) => {
@@ -126,7 +156,15 @@ export function LoginForm({className, googleClientId, ...props}) {
 						{googleClientId ? (
 							<div className="relative w-full h-[40px]">
 								{/* Custom visible Google button styled exactly like the GitHub button */}
-								<div className="absolute inset-0 w-full h-full bg-white hover:bg-zinc-50 text-zinc-950 border border-zinc-300 font-medium rounded-[8px] flex items-center justify-center gap-3 cursor-pointer pointer-events-none shadow-sm text-[14px]">
+								<Button
+									type="button"
+									onClick={() => handleOAuthLogin("google")}
+									disabled={loading}
+									className={cn(
+										"absolute inset-0 w-full h-full bg-white hover:bg-zinc-50 text-zinc-950 border border-zinc-300 font-medium rounded-[8px] flex items-center justify-center gap-3 cursor-pointer shadow-sm text-[14px]",
+										googleLibraryLoaded ? "pointer-events-none" : "pointer-events-auto"
+									)}
+								>
 									<svg
 										className="h-[18px] w-[18px] shrink-0"
 										viewBox="0 0 24 24"
@@ -150,11 +188,14 @@ export function LoginForm({className, googleClientId, ...props}) {
 										/>
 									</svg>
 									<span>Continue with Google</span>
-								</div>
+								</Button>
 								{/* Transparent Google-rendered iframe directly on top */}
 								<div
 									id="google-signin-btn-container"
-									className="absolute inset-0 w-full h-full opacity-0 z-10 cursor-pointer [&>div]:!w-full [&_iframe]:!w-full"
+									className={cn(
+										"absolute inset-0 w-full h-full opacity-0 [&>div]:!w-full [&_iframe]:!w-full transition-opacity duration-200",
+										googleLibraryLoaded ? "z-10 pointer-events-auto cursor-pointer" : "z-0 pointer-events-none"
+									)}
 								/>
 							</div>
 						) : (

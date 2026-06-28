@@ -1,6 +1,6 @@
 "use client";
 
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import {useDoorSign} from "../hooks/use-door-sign";
 import {DoorSignDisplay} from "./door-sign-display";
 import {DoorSignControl} from "./door-sign-control";
@@ -13,19 +13,32 @@ export function DoorSignContainer({ userId }) {
 		useDoorSign(userId);
 
 	const [view, setView] = useState("control"); // 'control' | 'display'
+	const [viewInitialized, setViewInitialized] = useState(false);
 	const [isPinDialogOpen, setIsPinDialogOpen] = useState(false);
+
+	useEffect(() => {
+		if (typeof window !== "undefined") {
+			const savedView = localStorage.getItem("door-sign-view");
+			if (savedView) {
+				setView(savedView);
+			}
+			setViewInitialized(true);
+		}
+	}, []);
 
 	const handleUnlockTrigger = () => {
 		if (state.pinEnabled && state.pin) {
 			setIsPinDialogOpen(true);
 		} else {
 			setView("control");
+			localStorage.setItem("door-sign-view", "control");
 		}
 	};
 
 	const handleCorrectPin = () => {
 		setIsPinDialogOpen(false);
 		setView("control");
+		localStorage.setItem("door-sign-view", "control");
 	};
 
 	const handleSignOut = async () => {
@@ -33,7 +46,7 @@ export function DoorSignContainer({ userId }) {
 		window.location.reload();
 	};
 
-	if (loading) {
+	if (loading || !viewInitialized) {
 		return (
 			<div className="flex flex-col items-center justify-center min-h-screen bg-zinc-950 text-zinc-400">
 				<div className="p-8 rounded-3xl border border-zinc-900 bg-zinc-950 flex flex-col items-center gap-4 shadow-2xl">
@@ -60,7 +73,10 @@ export function DoorSignContainer({ userId }) {
 					presets={presets}
 					updateStatus={updateStatus}
 					updateSettings={updateSettings}
-					onLaunch={() => setView("display")}
+					onLaunch={() => {
+						setView("display");
+						localStorage.setItem("door-sign-view", "display");
+					}}
 					onSignOut={handleSignOut}
 				/>
 			)}

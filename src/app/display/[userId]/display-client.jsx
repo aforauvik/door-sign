@@ -1,14 +1,25 @@
 "use client";
 
+import { useState } from "react";
 import { useDoorSign } from "@/features/door-sign/hooks/use-door-sign";
 import { DoorSignDisplay } from "@/features/door-sign/components/door-sign-display";
+import { PinDialog } from "@/features/door-sign/components/pin-dialog";
 import { Loader2 } from "lucide-react";
 
 export function DisplayClient({ userId }) {
   const { state, currentPreset, loading } = useDoorSign(userId);
+  const [isPinDialogOpen, setIsPinDialogOpen] = useState(false);
 
-  const handleUnlock = () => {
-    // Redirect to home dashboard
+  const handleUnlockTrigger = () => {
+    if (state.pinEnabled && state.pin) {
+      setIsPinDialogOpen(true);
+    } else {
+      window.location.href = "/";
+    }
+  };
+
+  const handleCorrectPin = () => {
+    setIsPinDialogOpen(false);
     window.location.href = "/";
   };
 
@@ -30,7 +41,16 @@ export function DisplayClient({ userId }) {
       <DoorSignDisplay
         state={state}
         currentPreset={currentPreset}
-        onUnlock={handleUnlock}
+        onUnlock={handleUnlockTrigger}
+      />
+
+      <PinDialog
+        key={isPinDialogOpen ? "open" : "closed"}
+        isOpen={isPinDialogOpen}
+        onClose={() => setIsPinDialogOpen(false)}
+        onCorrectPin={handleCorrectPin}
+        savedPin={state.pin}
+        theme={state.theme}
       />
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import {useState, useEffect} from "react";
+import Image from "next/image";
 import * as Icons from "lucide-react";
 import {Button} from "@/components/ui/button";
 import NoSleep from "nosleep.js";
@@ -217,14 +218,32 @@ export function DoorSignDisplay({state, currentPreset, onUnlock}) {
 				</div>
 			)}
 
-			{/* Top Header Row (Clock + Date) */}
-			<header className="z-10 flex flex-col items-start gap-1 w-full ml-0 mr-auto">
-				<span className={`text-lg font-semibold tracking-tight ${dateClass}`}>
-					{date}
-				</span>
-				<span className={`text-lg font-bold tracking-tight ${clockClass}`}>
-					{time}
-				</span>
+			{/* Top Header Row (Left: Logo + Name, Right: Clock + Date) */}
+			<header className="z-10 flex flex-row items-center justify-between w-full">
+				<div className="flex items-center gap-2">
+					<Image
+						src="/logo.svg"
+						alt="Knock Later Logo"
+						width={40}
+						height={40}
+						className="h-8 w-8"
+					/>
+					<span className={`text-lg font-bold tracking-tight ${clockClass}`}>
+						Knock Later
+					</span>
+				</div>
+				<div className="flex flex-col items-end gap-0.5 text-right">
+					<span
+						className={`text-base md:text-lg font-semibold tracking-tight ${dateClass}`}
+					>
+						{date}
+					</span>
+					<span
+						className={`text-lg md:text-xl font-bold tracking-tight ${clockClass}`}
+					>
+						{time}
+					</span>
+				</div>
 			</header>
 
 			<hr
