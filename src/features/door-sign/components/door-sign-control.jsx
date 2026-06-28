@@ -451,7 +451,7 @@ export function DoorSignControl({
 									Custom Presets
 								</h2>
 							</div>
-							<div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-4">
+							<div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-4">
 								{customPresets.map((preset) => {
 									const isActive = selectedId === preset.id;
 
