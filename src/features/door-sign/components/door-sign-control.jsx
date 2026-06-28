@@ -223,7 +223,7 @@ export function DoorSignControl({
 				</div>
 				<div className="flex items-center gap-2">
 					<Button
-						className="px-4 py-5 text-sm font-semibold dark:text-white text-emerald-600 bg-emerald-500/10 border-emerald-500/30 hover:bg-emerald-500/30 hover:border-emerald-500/30 transition-all duration-500 border-1"
+						className="px-4 py-5 text-sm font-semibold text-white bg-emerald-500 border-emerald-500 hover:bg-emerald-600 hover:border-emerald-600 transition-all duration-500 border-1"
 						onClick={handleDirectLaunch}
 					>
 						<Icons.DoorClosed className="h-4 w-4" />
@@ -233,11 +233,10 @@ export function DoorSignControl({
 					{/* More Actions Popover */}
 					<div className="relative" ref={popoverRef}>
 						<Button
-							className="px-3 py-5"
-							variant={isLight ? "outline" : "secondary"}
+							className={`px-3 py-5 ${isLight ? "text-black bg-zinc-100 hover:bg-zinc-200" : "text-white bg-zinc-900 hover:bg-zinc-800"}`}
 							onClick={() => setIsMoreOpen(!isMoreOpen)}
 						>
-							<Icons.MoreHorizontal className="h-4 w-4" />
+							<Icons.Settings className="h-4 w-4" />
 						</Button>
 
 						{isMoreOpen && (
@@ -931,7 +930,9 @@ function PresetEditDialog({
 						<div className="space-y-2">
 							<div className="flex justify-between items-center">
 								<label className={modalLabelClass}>Preset Title</label>
-								<span className={`text-[10px] font-medium ${title.length > 20 ? "text-red-500" : isLight ? "text-zinc-400" : "text-zinc-550"}`}>
+								<span
+									className={`text-[10px] font-medium ${title.length > 20 ? "text-red-500" : isLight ? "text-zinc-400" : "text-zinc-550"}`}
+								>
 									{title.length}/20
 								</span>
 							</div>
@@ -953,7 +954,9 @@ function PresetEditDialog({
 					<div className="space-y-2">
 						<div className="flex justify-between items-center">
 							<label className={modalLabelClass}>Custom Subtext</label>
-							<span className={`text-[10px] font-medium ${subtext.length > 75 ? "text-red-500" : isLight ? "text-zinc-400" : "text-zinc-550"}`}>
+							<span
+								className={`text-[10px] font-medium ${subtext.length > 75 ? "text-red-500" : isLight ? "text-zinc-400" : "text-zinc-550"}`}
+							>
 								{subtext.length}/75
 							</span>
 						</div>
@@ -1081,7 +1084,9 @@ function AddPresetDialog({isOpen, onClose, isLight, onSave}) {
 					<div className="space-y-2">
 						<div className="flex justify-between items-center">
 							<label className={modalLabelClass}>Preset Title</label>
-							<span className={`text-[10px] font-medium ${title.length > 20 ? "text-red-500" : isLight ? "text-zinc-400" : "text-zinc-550"}`}>
+							<span
+								className={`text-[10px] font-medium ${title.length > 20 ? "text-red-500" : isLight ? "text-zinc-400" : "text-zinc-550"}`}
+							>
 								{title.length}/20
 							</span>
 						</div>
@@ -1102,7 +1107,9 @@ function AddPresetDialog({isOpen, onClose, isLight, onSave}) {
 					<div className="space-y-2">
 						<div className="flex justify-between items-center">
 							<label className={modalLabelClass}>Default Subtext</label>
-							<span className={`text-[10px] font-medium ${subtext.length > 75 ? "text-red-500" : isLight ? "text-zinc-400" : "text-zinc-550"}`}>
+							<span
+								className={`text-[10px] font-medium ${subtext.length > 75 ? "text-red-500" : isLight ? "text-zinc-400" : "text-zinc-550"}`}
+							>
 								{subtext.length}/75
 							</span>
 						</div>
