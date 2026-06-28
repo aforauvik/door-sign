@@ -226,7 +226,7 @@ export function DoorSignControl({
 						className="px-4 py-5 text-sm font-semibold text-white bg-emerald-500 border-emerald-500 hover:bg-emerald-600 hover:border-emerald-600 transition-all duration-500 border-1"
 						onClick={handleDirectLaunch}
 					>
-						<Icons.DoorClosed className="h-4 w-4" />
+						<Icons.Expand className="h-4 w-4" />
 						Launch Display
 					</Button>
 
@@ -333,9 +333,13 @@ export function DoorSignControl({
 				<section className="space-y-6">
 					<div className="flex items-center justify-between">
 						<h2
-							className={`text-lg font-semibold flex items-center gap-2 ${sectionTitleClass}`}
+							className={`text-base font-semibold flex items-center gap-2 ${sectionTitleClass}`}
 						>
-							<Icons.Layout className="h-5 w-5 text-zinc-400" />
+							{selectedId === "available" ? (
+								<Icons.DoorOpen className="h-5 w-5" />
+							) : (
+								<Icons.DoorClosed className="h-5 w-5" />
+							)}
 							Status Presets
 						</h2>
 						<Button
@@ -437,9 +441,13 @@ export function DoorSignControl({
 						<div className={`space-y-6 pt-6 border-t ${dividerClass}`}>
 							<div className="flex items-center justify-between">
 								<h2
-									className={`text-lg font-semibold flex items-center gap-2 ${sectionTitleClass}`}
+									className={`text-base font-semibold flex items-center gap-2 ${sectionTitleClass}`}
 								>
-									<Icons.Clock className="h-5 w-5 text-zinc-400" />
+									{selectedId === "available" ? (
+										<Icons.DoorOpen className="h-5 w-5" />
+									) : (
+										<Icons.DoorClosed className="h-5 w-5" />
+									)}
 									Custom Presets
 								</h2>
 							</div>
