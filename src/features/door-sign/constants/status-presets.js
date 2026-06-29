@@ -17,8 +17,7 @@ export const STATUS_PRESETS = [
 		icon: "Users",
 		color: "amber",
 		badgeText: "Do Not Disturb",
-		defaultSubText:
-			"In a scheduled meeting. Please do not disturb unless it is an emergency.",
+		defaultSubText: "Please do not disturb unless urgent.",
 		glowClass: "shadow-amber-500/20 border-amber-500/30 bg-amber-500/5",
 		textClass: "text-amber-400",
 		bgGradient: "from-amber-950/30 via-zinc-950 to-zinc-950",
@@ -30,7 +29,7 @@ export const STATUS_PRESETS = [
 		color: "red",
 		badgeText: "ON AIR",
 		defaultSubText:
-			"Screen or video recording in progress. Thanks for keeping it quiet!",
+			"Screen or video recording in progress. Please keep noise to a minimum.",
 		glowClass:
 			"shadow-red-500/30 border-red-500/30 bg-red-500/5 animate-pulse-glow",
 		textClass: "text-red-500",
@@ -43,7 +42,8 @@ export const STATUS_PRESETS = [
 		icon: "Mic",
 		color: "purple",
 		badgeText: "LIVE RECORDING",
-		defaultSubText: "Audio recording in progress. Thanks for keeping it quiet!",
+		defaultSubText:
+			"Audio recording in progress. Please keep noise to a minimum.",
 		glowClass: "shadow-purple-500/35 border-purple-500/30 bg-purple-500/5",
 		textClass: "text-purple-400",
 		bgGradient: "from-purple-950/40 via-zinc-950 to-zinc-950",
@@ -55,7 +55,7 @@ export const STATUS_PRESETS = [
 		icon: "BookOpen",
 		color: "blue",
 		badgeText: "Busy",
-		defaultSubText: "Studying. Please do not disturb unless it is urgent.",
+		defaultSubText: "Please do not disturb unless urgent.",
 		glowClass: "shadow-blue-500/20 border-blue-500/30 bg-blue-500/5",
 		textClass: "text-blue-400",
 		bgGradient: "from-blue-950/30 via-zinc-950 to-zinc-950",
@@ -66,8 +66,7 @@ export const STATUS_PRESETS = [
 		icon: "MinusCircle",
 		color: "rose",
 		badgeText: "Focus Mode",
-		defaultSubText:
-			"Focus Mode On. Please do not disturb unless it is an emergency.",
+		defaultSubText: "Please do not disturb unless urgent.",
 		glowClass: "shadow-rose-500/30 border-rose-500/30 bg-rose-500/5",
 		textClass: "text-rose-500",
 		bgGradient: "from-rose-950/40 via-zinc-950 to-zinc-950",

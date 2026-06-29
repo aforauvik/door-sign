@@ -193,8 +193,8 @@ export function DoorSignDisplay({state, currentPreset, onUnlock}) {
 		cardBorderClass = "border-zinc-900";
 		labelClass = isAvailable ? "text-emerald-400" : "text-red-500";
 		endsAroundClass = "text-zinc-300";
-		timerIconClass = isAvailable ? "text-emerald-400" : "text-red-400";
-		valueColorClass = isAvailable ? "text-emerald-400" : "text-red-400";
+		timerIconClass = isAvailable ? "text-emerald-400" : "text-red-500";
+		valueColorClass = isAvailable ? "text-emerald-400" : "text-red-500";
 		settingsBtnClass =
 			"bg-zinc-900/60 text-zinc-400 border border-zinc-800/85 hover:bg-zinc-800 hover:text-zinc-200";
 	}
@@ -282,7 +282,7 @@ export function DoorSignDisplay({state, currentPreset, onUnlock}) {
 				{/* Approximate Finish Time */}
 				{state.finishTime && statusId !== "available" && (
 					<div
-						className={`mt-6 ${endsAroundClass} border-t border-b border-red-400 p-2 text-sm md:text-base font-medium flex items-center gap-2.5`}
+						className={`mt-6 ${endsAroundClass} border-t border-b border-red-500 p-2 text-sm md:text-base font-medium flex items-center gap-2.5`}
 					>
 						<Icons.Timer
 							className={`h-5 w-5 ${timerIconClass} animate-pulse`}
