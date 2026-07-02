@@ -14,12 +14,18 @@ export function DisplayClient({ userId }) {
     if (state.pinEnabled && state.pin) {
       setIsPinDialogOpen(true);
     } else {
+      try {
+        localStorage.setItem("door-sign-view", "control");
+      } catch (e) {}
       window.location.href = "/";
     }
   };
 
   const handleCorrectPin = () => {
     setIsPinDialogOpen(false);
+    try {
+      localStorage.setItem("door-sign-view", "control");
+    } catch (e) {}
     window.location.href = "/";
   };
 
