@@ -1,6 +1,6 @@
 "use client";
 
-import {useState, useEffect} from "react";
+import {useState, useEffect, useCallback} from "react";
 import {STATUS_PRESETS} from "../constants/status-presets";
 import {getSupabaseClient} from "@/lib/supabase/client";
 import {
@@ -125,7 +125,7 @@ export function useDoorSign(userId = "default") {
 		};
 	}, [userId]);
 
-	const updateStatus = async (statusId, customText = "", customTitle = "") => {
+	const updateStatus = useCallback(async (statusId, customText = "", customTitle = "") => {
 		// Optimistic local update
 		setState((prev) => ({
 			...prev,
@@ -136,9 +136,9 @@ export function useDoorSign(userId = "default") {
 
 		// Server Action write
 		await updateDoorSignStatus(statusId, customText, customTitle, userId);
-	};
+	}, [userId]);
 
-	const updateSettings = async (updates) => {
+	const updateSettings = useCallback(async (updates) => {
 		// Optimistic local update
 		setState((prev) => ({
 			...prev,
@@ -147,9 +147,71 @@ export function useDoorSign(userId = "default") {
 
 		// Server Action write
 		await updateDoorSignSettings(updates, userId);
-	};
+	}, [userId]);
 
-	const allPresets = [...STATUS_PRESETS, ...(state.customPresets || [])];
+	useEffect(() => {
+		if (state.statusId === "available" || !state.finishTime) return;
+
+		const checkExpiry = () => {
+			const now = new Date();
+			const match = state.finishTime.match(/^(\d+):(\d+)\s*(AM|PM)$/i);
+			if (!match) return;
+
+			let hours = parseInt(match[1], 10);
+			const minutes = parseInt(match[2], 10);
+			const ampm = match[3].toUpperCase();
+
+			if (ampm === "PM" && hours < 12) hours += 12;
+			if (ampm === "AM" && hours === 12) hours = 0;
+
+			const target = new Date(now.getTime());
+			target.setHours(hours, minutes, 0, 0);
+
+			// Check if status is from a different calendar day
+			const lastUpdatedDate = state.lastUpdated ? new Date(state.lastUpdated) : null;
+			const isDifferentDay = lastUpdatedDate && (
+				lastUpdatedDate.getDate() !== now.getDate() ||
+				lastUpdatedDate.getMonth() !== now.getMonth() ||
+				lastUpdatedDate.getFullYear() !== now.getFullYear()
+			);
+
+			if (isDifferentDay) {
+				updateStatus("available");
+				return;
+			}
+
+			let diff = target.getTime() - now.getTime();
+			// If target is in the past by more than 6 hours, assume it was set for tomorrow morning
+			if (diff < -6 * 60 * 60 * 1000) {
+				target.setDate(target.getDate() + 1);
+				diff = target.getTime() - now.getTime();
+			}
+
+			if (diff <= 0) {
+				updateStatus("available");
+			}
+		};
+
+		// Run check immediately and then every 10 seconds
+		checkExpiry();
+		const interval = setInterval(checkExpiry, 10000);
+		return () => clearInterval(interval);
+	}, [state.statusId, state.finishTime, state.lastUpdated, updateStatus]);
+
+	const allPresets = [
+		...STATUS_PRESETS.filter((p) => !state.presetsOverrides?.[p.id]?.isDeleted),
+		...(state.customPresets || []),
+	].map((preset) => {
+		const override = state.presetsOverrides?.[preset.id];
+		if (override) {
+			return {
+				...preset,
+				label: override.title || preset.label,
+				defaultSubText: override.subtext || preset.defaultSubText,
+			};
+		}
+		return preset;
+	});
 	const currentPreset =
 		allPresets.find((p) => p.id === state.statusId) || allPresets[0];
 

@@ -15,6 +15,13 @@ import {
 	DialogTitle,
 	DialogFooter,
 } from "@/components/ui/dialog";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 
 // Dynamic Icon Component Loader
 function StatusIcon({name, className}) {
@@ -45,8 +52,44 @@ export function DoorSignControl({
 	const popoverRef = useRef(null);
 
 	const activePreset = presets.find((p) => p.id === selectedId) || presets[0];
-	const defaultPresets = presets.filter((p) => !p.isCustom);
-	const customPresets = presets.filter((p) => p.isCustom);
+
+	// Parse finishTime into separate hour, minute, ampm states
+	const parseFinishTime = (timeStr) => {
+		if (!timeStr) return {hour: "", minute: "", ampm: "", isSet: false};
+		const match = timeStr.match(/^(\d+):(\d+)\s*(AM|PM)$/i);
+		if (!match) return {hour: "", minute: "", ampm: "", isSet: false};
+		return {
+			hour: match[1],
+			minute: match[2],
+			ampm: match[3].toUpperCase(),
+			isSet: true,
+		};
+	};
+
+	const getCurrentTimeComponents = () => {
+		const d = new Date();
+		// Round to next 5 minutes
+		const minutes = Math.ceil(d.getMinutes() / 5) * 5;
+		d.setMinutes(minutes);
+
+		let hours = d.getHours();
+		const ampm = hours >= 12 ? "PM" : "AM";
+		hours = hours % 12;
+		hours = hours ? hours.toString() : "12";
+		const minutesStr = d.getMinutes().toString().padStart(2, "0");
+
+		return {hour: hours, minute: minutesStr, ampm};
+	};
+
+	const {hour, minute, ampm, isSet} = parseFinishTime(finishTime);
+
+	const handleTimePickerChange = (newHour, newMinute, newAmpm) => {
+		const current = getCurrentTimeComponents();
+		const h = newHour || hour || current.hour;
+		const m = newMinute || minute || current.minute;
+		const a = newAmpm || ampm || current.ampm;
+		handleFinishTimeChange(`${h}:${m} ${a}`);
+	};
 
 	// Keep state updated if parent state changes
 	useEffect(() => {
@@ -352,7 +395,7 @@ export function DoorSignControl({
 						</Button>
 					</div>
 					<div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-4">
-						{defaultPresets.map((preset) => {
+						{presets.map((preset) => {
 							const isActive = selectedId === preset.id;
 
 							return (
@@ -435,108 +478,6 @@ export function DoorSignControl({
 							);
 						})}
 					</div>
-
-					{/* Custom Presets Grid */}
-					{customPresets.length > 0 && (
-						<div className={`space-y-6 pt-6 border-t ${dividerClass}`}>
-							<div className="flex items-center justify-between">
-								<h2
-									className={`text-base font-semibold flex items-center gap-2 ${sectionTitleClass}`}
-								>
-									{selectedId === "available" ? (
-										<Icons.DoorOpen className="h-5 w-5" />
-									) : (
-										<Icons.DoorClosed className="h-5 w-5" />
-									)}
-									Custom Presets
-								</h2>
-							</div>
-							<div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-4">
-								{customPresets.map((preset) => {
-									const isActive = selectedId === preset.id;
-
-									return (
-										<Card
-											key={preset.id}
-											onClick={() => handleStatusSelect(preset.id)}
-											className={`relative cursor-pointer rounded-2xl border flex flex-col justify-between p-4 overflow-hidden select-none h-[160px] transition-all duration-200 ${
-												isActive
-													? "border-emerald-500 bg-emerald-500/5 ring-1 ring-emerald-500/20"
-													: isLight
-														? "border-zinc-100 bg-white hover:border-zinc-200"
-														: "border-zinc-800 bg-zinc-900/40 hover:border-zinc-700"
-											}`}
-										>
-											{/* Top-left: Small Icon */}
-											<div
-												className={`p-2 rounded-lg w-fit transition-colors ${
-													isActive
-														? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/15"
-														: isLight
-															? "bg-zinc-100 text-zinc-500 border border-zinc-200"
-															: "bg-zinc-950 text-zinc-400 border border-zinc-900"
-												}`}
-											>
-												<StatusIcon name={preset.icon} className="h-5 w-5" />
-											</div>
-
-											{/* Top-right: More Settings Button */}
-											<Button
-												variant="ghost"
-												size="icon"
-												onClick={(e) => {
-													e.stopPropagation();
-													setEditingPreset(preset);
-												}}
-												className={`absolute top-3 right-3 h-6 w-6 rounded-md transition-all ${
-													isActive
-														? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20"
-														: isLight
-															? "bg-zinc-50 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 border border-zinc-200"
-															: "bg-zinc-950 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300 border border-zinc-900"
-												}`}
-											>
-												<Icons.MoreHorizontal className="h-3.5 w-3.5" />
-											</Button>
-
-											{/* Bottom-left: Stacked Title & Subtitle */}
-											<div className="flex flex-col text-left gap-1 mt-auto">
-												{isActive && (
-													<span className="text-[10px] uppercase font-bold tracking-wider text-emerald-500 flex items-center gap-1.5 mb-0.5 flex-wrap">
-														<span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-														Active
-														{state.finishTime && preset.id !== "available" && (
-															<span className="normal-case font-semibold text-emerald-600 dark:text-emerald-400/90 ml-1">
-																• Until {state.finishTime}
-															</span>
-														)}
-													</span>
-												)}
-												<span
-													className={`font-semibold text-sm leading-tight transition-colors ${
-														isActive
-															? isLight
-																? "text-emerald-700 font-bold"
-																: "text-white font-bold"
-															: isLight
-																? "text-zinc-800"
-																: "text-zinc-200"
-													}`}
-												>
-													{state.presetsOverrides?.[preset.id]?.title ||
-														preset.label}
-												</span>
-												<span className="text-xs text-zinc-500 line-clamp-2 leading-tight">
-													{state.presetsOverrides?.[preset.id]?.subtext ||
-														preset.defaultSubText}
-												</span>
-											</div>
-										</Card>
-									);
-								})}
-							</div>
-						</div>
-					)}
 				</section>
 			</main>
 
@@ -545,10 +486,24 @@ export function DoorSignControl({
 					isOpen={!!editingPreset}
 					onClose={() => setEditingPreset(null)}
 					preset={editingPreset}
+					initialTitle={
+						state.presetsOverrides?.[editingPreset.id]?.title ||
+						editingPreset.label
+					}
 					initialSubtext={state.presetsOverrides?.[editingPreset.id]?.subtext}
 					isLight={isLight}
 					onSave={(subtext, updatedTitle) => {
-						if (editingPreset.isCustom && updatedTitle) {
+						if (editingPreset.id === "available") {
+							const currentOverrides = state.presetsOverrides || {};
+							const newOverrides = {
+								...currentOverrides,
+								[editingPreset.id]: {
+									...currentOverrides[editingPreset.id],
+									subtext,
+								},
+							};
+							updateSettings({presetsOverrides: newOverrides});
+						} else if (editingPreset.isCustom && updatedTitle) {
 							const currentCustom = state.customPresets || [];
 							const newCustom = currentCustom.map((p) =>
 								p.id === editingPreset.id ? {...p, label: updatedTitle} : p,
@@ -556,7 +511,11 @@ export function DoorSignControl({
 							const currentOverrides = state.presetsOverrides || {};
 							const newOverrides = {
 								...currentOverrides,
-								[editingPreset.id]: {subtext},
+								[editingPreset.id]: {
+									...currentOverrides[editingPreset.id],
+									title: updatedTitle,
+									subtext,
+								},
 							};
 							updateSettings({
 								customPresets: newCustom,
@@ -566,28 +525,51 @@ export function DoorSignControl({
 							const currentOverrides = state.presetsOverrides || {};
 							const newOverrides = {
 								...currentOverrides,
-								[editingPreset.id]: {subtext},
+								[editingPreset.id]: {
+									...currentOverrides[editingPreset.id],
+									title: updatedTitle,
+									subtext,
+								},
 							};
 							updateSettings({presetsOverrides: newOverrides});
 						}
 					}}
 					onDelete={() => {
-						const currentCustom = state.customPresets || [];
-						const newCustom = currentCustom.filter(
-							(p) => p.id !== editingPreset.id,
-						);
-						const currentOverrides = state.presetsOverrides || {};
-						const newOverrides = {...currentOverrides};
-						delete newOverrides[editingPreset.id];
-						const newStatusId =
-							state.statusId === editingPreset.id
-								? "available"
-								: state.statusId;
-						updateSettings({
-							customPresets: newCustom,
-							presetsOverrides: newOverrides,
-							statusId: newStatusId,
-						});
+						if (editingPreset.isCustom) {
+							const currentCustom = state.customPresets || [];
+							const newCustom = currentCustom.filter(
+								(p) => p.id !== editingPreset.id,
+							);
+							const currentOverrides = state.presetsOverrides || {};
+							const newOverrides = {...currentOverrides};
+							delete newOverrides[editingPreset.id];
+							const newStatusId =
+								state.statusId === editingPreset.id
+									? "available"
+									: state.statusId;
+							updateSettings({
+								customPresets: newCustom,
+								presetsOverrides: newOverrides,
+								statusId: newStatusId,
+							});
+						} else {
+							const currentOverrides = state.presetsOverrides || {};
+							const newOverrides = {
+								...currentOverrides,
+								[editingPreset.id]: {
+									...currentOverrides[editingPreset.id],
+									isDeleted: true,
+								},
+							};
+							const newStatusId =
+								state.statusId === editingPreset.id
+									? "available"
+									: state.statusId;
+							updateSettings({
+								presetsOverrides: newOverrides,
+								statusId: newStatusId,
+							});
+						}
 					}}
 				/>
 			)}
@@ -627,7 +609,7 @@ export function DoorSignControl({
 								<div className="space-y-3">
 									<div className="flex flex-col gap-1">
 										<label className={modalLabelClass}>
-											Approximate End Time (Optional)
+											Select custom time
 										</label>
 										<p className={modalSubLabelClass}>
 											Indicate when you expect to finish this status.
@@ -651,28 +633,171 @@ export function DoorSignControl({
 												</Button>
 											);
 										})}
-										{finishTime && (
+									</div>
+
+									<div className="flex items-center gap-3 py-0 mt-1.5">
+										<div className={`h-px flex-1 ${isLight ? "bg-zinc-200" : "bg-zinc-800"}`} />
+										<span className="text-[10px] font-bold tracking-wider uppercase text-zinc-400 dark:text-zinc-500">
+											or
+										</span>
+										<div className={`h-px flex-1 ${isLight ? "bg-zinc-200" : "bg-zinc-800"}`} />
+									</div>
+
+									<div className="flex gap-2 justify-center items-center mt-1.5 w-full">
+										{/* Hour Select */}
+										<div className="relative flex-1 flex items-center">
+											<Icons.Clock className="absolute left-3 h-4 w-4 text-zinc-500 pointer-events-none z-10" />
+											<Select
+												value={isSet ? hour : ""}
+												onValueChange={(val) =>
+													handleTimePickerChange(val, "", "")
+												}
+											>
+												<SelectTrigger
+													className={`pl-9 pr-3 h-11 w-full rounded-md border ${
+														isLight
+															? "border-zinc-200 bg-zinc-50 text-zinc-900 data-[placeholder]:text-zinc-400"
+															: "border-zinc-800 bg-zinc-950 text-zinc-200 data-[placeholder]:text-zinc-400"
+													} text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/25 cursor-pointer`}
+												>
+													<SelectValue placeholder="Hour" />
+												</SelectTrigger>
+												<SelectContent
+													className={
+														isLight
+															? "bg-white text-zinc-900 border-zinc-200"
+															: "bg-zinc-950 text-zinc-200 border-zinc-800"
+													}
+												>
+													{Array.from({length: 12}, (_, i) =>
+														(i + 1).toString(),
+													).map((h) => (
+														<SelectItem
+															key={h}
+															value={h}
+															className={
+																isLight
+																	? "hover:bg-zinc-100 text-zinc-900"
+																	: "hover:bg-zinc-900 text-zinc-200"
+															}
+														>
+															{h}
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+										</div>
+
+										<span className="text-sm font-bold text-zinc-400">:</span>
+
+										{/* Minute Select */}
+										<div className="relative flex-1 flex items-center">
+											<Select
+												value={isSet ? minute : ""}
+												onValueChange={(val) =>
+													handleTimePickerChange("", val, "")
+												}
+											>
+												<SelectTrigger
+													className={`pl-3 pr-3 h-11 w-full rounded-md border ${
+														isLight
+															? "border-zinc-200 bg-zinc-50 text-zinc-900 data-[placeholder]:text-zinc-400"
+															: "border-zinc-800 bg-zinc-950 text-zinc-200 data-[placeholder]:text-zinc-400"
+													} text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/25 cursor-pointer`}
+												>
+													<SelectValue placeholder="Min" />
+												</SelectTrigger>
+												<SelectContent
+													className={
+														isLight
+															? "bg-white text-zinc-900 border-zinc-200"
+															: "bg-zinc-950 text-zinc-200 border-zinc-800"
+													}
+												>
+													{Array.from({length: 12}, (_, i) =>
+														(i * 5).toString().padStart(2, "0"),
+													).map((m) => (
+														<SelectItem
+															key={m}
+															value={m}
+															className={
+																isLight
+																	? "hover:bg-zinc-100 text-zinc-900"
+																	: "hover:bg-zinc-900 text-zinc-200"
+															}
+														>
+															{m}
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+										</div>
+
+										{/* AM/PM Select */}
+										<div className="relative flex-1 flex items-center">
+											<Select
+												value={isSet ? ampm : ""}
+												onValueChange={(val) =>
+													handleTimePickerChange("", "", val)
+												}
+											>
+												<SelectTrigger
+													className={`pl-3 pr-3 h-11 w-full rounded-md border ${
+														isLight
+															? "border-zinc-200 bg-zinc-50 text-zinc-900 data-[placeholder]:text-zinc-400"
+															: "border-zinc-800 bg-zinc-950 text-zinc-200 data-[placeholder]:text-zinc-400"
+													} text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/25 cursor-pointer`}
+												>
+													<SelectValue placeholder="AM/PM" />
+												</SelectTrigger>
+												<SelectContent
+													className={
+														isLight
+															? "bg-white text-zinc-900 border-zinc-200"
+															: "bg-zinc-950 text-zinc-200 border-zinc-800"
+													}
+												>
+													<SelectItem
+														value="AM"
+														className={
+															isLight
+																? "hover:bg-zinc-100 text-zinc-900"
+																: "hover:bg-zinc-900 text-zinc-200"
+														}
+													>
+														AM
+													</SelectItem>
+													<SelectItem
+														value="PM"
+														className={
+															isLight
+																? "hover:bg-zinc-100 text-zinc-900"
+																: "hover:bg-zinc-900 text-zinc-200"
+														}
+													>
+														PM
+													</SelectItem>
+												</SelectContent>
+											</Select>
+										</div>
+									</div>
+
+									{finishTime && (
+										<div className={`flex items-center justify-between gap-3 p-3 rounded-xl border text-sm font-semibold ${isLight ? "bg-emerald-50/50 border-emerald-100 text-emerald-800" : "bg-emerald-950/20 border-emerald-900/30 text-emerald-400"}`}>
+											<div className="flex items-center gap-2">
+												<Icons.Clock className="h-4 w-4 shrink-0 text-emerald-500" />
+												<span>Status will end at: <strong className="text-base font-extrabold text-emerald-600 dark:text-emerald-400">{finishTime}</strong></span>
+											</div>
 											<Button
 												variant="ghost"
 												size="sm"
 												onClick={() => handleFinishTimeChange("")}
-												className="rounded-lg px-3 text-red-500 hover:text-red-400 hover:bg-red-500/10"
+												className="rounded-lg px-2.5 h-8 text-red-500 hover:text-red-400 hover:bg-red-500/10 font-semibold transition-all shrink-0"
 											>
 												Clear
 											</Button>
-										)}
-									</div>
-
-									<div className="relative">
-										<Icons.Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
-										<Input
-											type="text"
-											value={finishTime}
-											onChange={(e) => handleFinishTimeChange(e.target.value)}
-											placeholder="e.g. 3:00 PM, in 30 mins"
-											className={`pl-10 ${inputClass}`}
-										/>
-									</div>
+										</div>
+									)}
 								</div>
 							)}
 						</div>
@@ -863,24 +988,25 @@ function PresetEditDialog({
 	isOpen,
 	onClose,
 	preset,
+	initialTitle,
 	initialSubtext,
 	isLight,
 	onSave,
 	onDelete,
 }) {
-	const [title, setTitle] = useState(preset?.label || "");
+	const [title, setTitle] = useState(initialTitle || preset?.label || "");
 	const [subtext, setSubtext] = useState(initialSubtext || "");
 	const [error, setError] = useState("");
 
 	useEffect(() => {
-		setTitle(preset?.label || "");
+		setTitle(initialTitle || preset?.label || "");
 		setSubtext(initialSubtext || "");
 		setError("");
-	}, [preset, initialSubtext]);
+	}, [preset, initialTitle, initialSubtext]);
 
 	const handleSave = () => {
 		const trimmedTitle = title.trim();
-		if (preset?.isCustom) {
+		if (preset?.id !== "available") {
 			if (!trimmedTitle) {
 				setError("Title is required.");
 				return;
@@ -895,11 +1021,6 @@ function PresetEditDialog({
 			return;
 		}
 		onSave(subtext, trimmedTitle);
-		onClose();
-	};
-
-	const handleReset = () => {
-		onSave("");
 		onClose();
 	};
 
@@ -934,7 +1055,7 @@ function PresetEditDialog({
 				</DialogHeader>
 
 				<div className="space-y-4 py-4">
-					{preset?.isCustom && (
+					{preset?.id !== "available" && (
 						<div className="space-y-2">
 							<div className="flex justify-between items-center">
 								<label className={modalLabelClass}>Preset Title</label>
@@ -973,7 +1094,7 @@ function PresetEditDialog({
 							maxLength={75}
 							value={subtext}
 							onChange={(e) => setSubtext(e.target.value)}
-							placeholder={`e.g. Writing code. (Default: "${preset?.defaultSubText}")`}
+							placeholder={preset?.defaultSubText ? `e.g. ${preset.defaultSubText}` : "e.g. Please do not disturb"}
 							className={inputClass}
 						/>
 					</div>
@@ -982,7 +1103,7 @@ function PresetEditDialog({
 				<DialogFooter
 					className={`flex gap-2 sm:justify-between border-t ${isLight ? "border-zinc-150" : "border-zinc-900"} pt-4 mt-2`}
 				>
-					{preset?.isCustom ? (
+					{preset?.id !== "available" ? (
 						<Button
 							variant="ghost"
 							onClick={() => {
@@ -994,13 +1115,7 @@ function PresetEditDialog({
 							Delete Preset
 						</Button>
 					) : (
-						<Button
-							variant="ghost"
-							onClick={handleReset}
-							className="text-red-500 hover:text-red-650 hover:bg-red-500/10 font-semibold"
-						>
-							Reset to Default
-						</Button>
+						<div />
 					)}
 					<div className="flex gap-2">
 						<Button
