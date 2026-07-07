@@ -37,6 +37,7 @@ export function DoorSignControl({
 	updateSettings,
 	onLaunch,
 	onSignOut,
+	user,
 }) {
 	const [selectedId, setSelectedId] = useState(state.statusId);
 	const [pinEnabled, setPinEnabled] = useState(state.pinEnabled);
@@ -180,7 +181,7 @@ export function DoorSignControl({
 	const headerTextClass = isLight ? "text-zinc-900" : "text-white";
 	const descTextClass = isLight ? "text-zinc-500" : "text-zinc-400";
 	const sectionTitleClass = isLight ? "text-zinc-800" : "text-zinc-200";
-	const dividerClass = isLight ? "border-zinc-100" : "border-zinc-800";
+	const dividerClass = isLight ? "border-zinc-200" : "border-zinc-800";
 
 	const cardClass = isLight
 		? "border-zinc-100 bg-white"
@@ -243,7 +244,9 @@ export function DoorSignControl({
 		<div
 			className={`flex flex-col min-h-screen font-sans p-6 md:p-12 transition-colors duration-300 ${containerClass}`}
 		>
-			<header className="max-w-5xl mx-auto w-full mb-8 flex flex-row items-center justify-between gap-4">
+			<header
+				className={`max-w-5xl mx-auto w-full pb-5 mb-8 flex flex-row items-center justify-between gap-4 border-b ${dividerClass}`}
+			>
 				<div>
 					<div className="flex items-center gap-2">
 						{/* <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" /> */}
@@ -260,9 +263,6 @@ export function DoorSignControl({
 							Knock Later
 						</h1>
 					</div>
-					{/* <p className={`${descTextClass} text-sm mt-1`}>
-						Select your status and configure display preferences.
-					</p> */}
 				</div>
 				<div className="flex items-center gap-2">
 					<Button
@@ -291,6 +291,44 @@ export function DoorSignControl({
 								}`}
 							>
 								<div className="flex flex-col gap-1">
+									{/* User Profile Header */}
+									{user && (
+										<>
+											<div className="flex items-center gap-2.5 px-3 py-2">
+												{user.user_metadata?.avatar_url ? (
+													<img
+														src={user.user_metadata.avatar_url}
+														alt={user.user_metadata.full_name || "Profile"}
+														className="h-9 w-9 rounded-full object-cover border border-zinc-200 dark:border-zinc-800"
+														referrerPolicy="no-referrer"
+													/>
+												) : (
+													<div className="h-9 w-9 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 font-bold text-sm shrink-0">
+														{(
+															user.user_metadata?.full_name ||
+															user.email ||
+															"U"
+														)
+															.charAt(0)
+															.toUpperCase()}
+													</div>
+												)}
+												<div className="flex flex-col min-w-0">
+													<span
+														className={`text-xs font-semibold truncate ${isLight ? "text-zinc-800" : "text-zinc-200"}`}
+													>
+														{user.user_metadata?.full_name || "Sign User"}
+													</span>
+													<span
+														className={`text-[10px] truncate ${isLight ? "text-zinc-500" : "text-zinc-400"}`}
+													>
+														{user.email}
+													</span>
+												</div>
+											</div>
+											<hr className={`${dividerClass} my-0.5`} />
+										</>
+									)}
 									{/* Theme Switcher Item */}
 									<div className="flex items-center justify-between w-full px-3 py-2 rounded-xl">
 										<div className="flex items-center gap-2.5">
@@ -372,6 +410,21 @@ export function DoorSignControl({
 			</header>
 
 			<main className="max-w-5xl mx-auto w-full space-y-8 flex flex-col">
+				{/* Welcome greeting */}
+				<div className="flex flex-col gap-1">
+					<h2
+						className={`text-2xl md:text-3xl font-bold tracking-tight ${headerTextClass}`}
+					>
+						Welcome back,{" "}
+						{user?.user_metadata?.full_name ||
+							user?.email?.split("@")[0] ||
+							"User"}
+					</h2>
+					<p className={`${descTextClass} text-sm`}>
+						Select your status and configure display preferences.
+					</p>
+				</div>
+
 				{/* Presets Grid */}
 				<section className="space-y-6">
 					<div className="flex items-center justify-between">
@@ -616,18 +669,17 @@ export function DoorSignControl({
 										</p>
 									</div>
 
-									<div className="flex flex-wrap gap-2">
+									<div className="flex w-full gap-2">
 										{[15, 30, 45, 60, 120].map((mins) => {
 											const label = mins >= 60 ? `${mins / 60}h` : `${mins}m`;
 											return (
 												<Button
 													key={mins}
 													variant="outline"
-													size="sm"
 													onClick={() =>
 														handleFinishTimeChange(getReturnTimeStr(mins))
 													}
-													className={modalTimeBtnClass}
+													className={`${modalTimeBtnClass} flex-1 h-9 text-xs sm:text-sm font-semibold rounded-md`}
 												>
 													+{label}
 												</Button>
@@ -636,11 +688,15 @@ export function DoorSignControl({
 									</div>
 
 									<div className="flex items-center gap-3 py-0 mt-1.5">
-										<div className={`h-px flex-1 ${isLight ? "bg-zinc-200" : "bg-zinc-800"}`} />
+										<div
+											className={`h-px flex-1 ${isLight ? "bg-zinc-200" : "bg-zinc-800"}`}
+										/>
 										<span className="text-[10px] font-bold tracking-wider uppercase text-zinc-400 dark:text-zinc-500">
 											or
 										</span>
-										<div className={`h-px flex-1 ${isLight ? "bg-zinc-200" : "bg-zinc-800"}`} />
+										<div
+											className={`h-px flex-1 ${isLight ? "bg-zinc-200" : "bg-zinc-800"}`}
+										/>
 									</div>
 
 									<div className="flex gap-2 justify-center items-center mt-1.5 w-full">
@@ -654,7 +710,7 @@ export function DoorSignControl({
 												}
 											>
 												<SelectTrigger
-													className={`pl-9 pr-3 h-11 w-full rounded-md border ${
+													className={`pl-9 pr-3 !h-9 w-full rounded-md border ${
 														isLight
 															? "border-zinc-200 bg-zinc-50 text-zinc-900 data-[placeholder]:text-zinc-400"
 															: "border-zinc-800 bg-zinc-950 text-zinc-200 data-[placeholder]:text-zinc-400"
@@ -699,7 +755,7 @@ export function DoorSignControl({
 												}
 											>
 												<SelectTrigger
-													className={`pl-3 pr-3 h-11 w-full rounded-md border ${
+													className={`pl-3 pr-3 !h-9 w-full rounded-md border ${
 														isLight
 															? "border-zinc-200 bg-zinc-50 text-zinc-900 data-[placeholder]:text-zinc-400"
 															: "border-zinc-800 bg-zinc-950 text-zinc-200 data-[placeholder]:text-zinc-400"
@@ -742,7 +798,7 @@ export function DoorSignControl({
 												}
 											>
 												<SelectTrigger
-													className={`pl-3 pr-3 h-11 w-full rounded-md border ${
+													className={`pl-3 pr-3 !h-9 w-full rounded-md border ${
 														isLight
 															? "border-zinc-200 bg-zinc-50 text-zinc-900 data-[placeholder]:text-zinc-400"
 															: "border-zinc-800 bg-zinc-950 text-zinc-200 data-[placeholder]:text-zinc-400"
@@ -783,10 +839,17 @@ export function DoorSignControl({
 									</div>
 
 									{finishTime && (
-										<div className={`flex items-center justify-between gap-3 p-3 rounded-xl border text-sm font-semibold ${isLight ? "bg-emerald-50/50 border-emerald-100 text-emerald-800" : "bg-emerald-950/20 border-emerald-900/30 text-emerald-400"}`}>
+										<div
+											className={`flex items-center justify-between gap-3 p-3 rounded-xl border text-sm font-semibold ${isLight ? "bg-emerald-50/50 border-emerald-100 text-emerald-800" : "bg-emerald-950/20 border-emerald-900/30 text-emerald-400"}`}
+										>
 											<div className="flex items-center gap-2">
 												<Icons.Clock className="h-4 w-4 shrink-0 text-emerald-500" />
-												<span>Status will end at: <strong className="text-base font-extrabold text-emerald-600 dark:text-emerald-400">{finishTime}</strong></span>
+												<span>
+													Status will end at:{" "}
+													<strong className="text-base font-extrabold text-emerald-600 dark:text-emerald-400">
+														{finishTime}
+													</strong>
+												</span>
 											</div>
 											<Button
 												variant="ghost"
@@ -1094,7 +1157,11 @@ function PresetEditDialog({
 							maxLength={75}
 							value={subtext}
 							onChange={(e) => setSubtext(e.target.value)}
-							placeholder={preset?.defaultSubText ? `e.g. ${preset.defaultSubText}` : "e.g. Please do not disturb"}
+							placeholder={
+								preset?.defaultSubText
+									? `e.g. ${preset.defaultSubText}`
+									: "e.g. Please do not disturb"
+							}
 							className={inputClass}
 						/>
 					</div>

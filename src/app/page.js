@@ -18,7 +18,14 @@ export default async function Home() {
 
   return (
     <main className="flex-1 flex flex-col w-full h-full min-h-screen">
-      <DoorSignContainer userId={user.id} />
+      <DoorSignContainer
+        userId={user.id}
+        user={{
+          id: user.id,
+          email: user.email,
+          user_metadata: user.user_metadata,
+        }}
+      />
     </main>
   );
 }

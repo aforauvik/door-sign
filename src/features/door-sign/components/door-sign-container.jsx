@@ -9,7 +9,7 @@ import {PinDialog} from "./pin-dialog";
 import {Loader2} from "lucide-react";
 import {signOutAction} from "../actions/auth-actions";
 
-export function DoorSignContainer({ userId }) {
+export function DoorSignContainer({ userId, user }) {
 	const {state, currentPreset, loading, updateStatus, updateSettings, presets} =
 		useDoorSign(userId);
 
@@ -74,6 +74,7 @@ export function DoorSignContainer({ userId }) {
 					presets={presets}
 					updateStatus={updateStatus}
 					updateSettings={updateSettings}
+					user={user}
 					onLaunch={() => {
 						setView("display");
 						localStorage.setItem("door-sign-view", "display");
