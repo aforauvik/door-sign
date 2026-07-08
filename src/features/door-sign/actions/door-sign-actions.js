@@ -37,6 +37,9 @@ export async function fetchDoorSignState(userId = "default") {
         pin: "",
         pin_enabled: false,
         theme: "dark",
+        scheduled_status_id: null,
+        scheduled_start_time: null,
+        scheduled_finish_time: null,
       };
       const { data: inserted, error: insertError } = await supabase
         .from("door_sign_state")
@@ -74,6 +77,9 @@ export async function updateDoorSignStatus(statusId, customText = "", customTitl
       .update({
         status_id: statusId,
         finish_time: "", // Reset finish time when status changes
+        scheduled_status_id: null,
+        scheduled_start_time: null,
+        scheduled_finish_time: null,
         updated_at: new Date().toISOString(),
       })
       .eq("id", userId);
@@ -105,6 +111,9 @@ export async function updateDoorSignSettings(updates, userId = "default") {
     if (updates.pin !== undefined) dbUpdates.pin = updates.pin;
     if (updates.pinEnabled !== undefined) dbUpdates.pin_enabled = updates.pinEnabled;
     if (updates.theme !== undefined) dbUpdates.theme = updates.theme;
+    if (updates.scheduledStatusId !== undefined) dbUpdates.scheduled_status_id = updates.scheduledStatusId;
+    if (updates.scheduledStartTime !== undefined) dbUpdates.scheduled_start_time = updates.scheduledStartTime;
+    if (updates.scheduledFinishTime !== undefined) dbUpdates.scheduled_finish_time = updates.scheduledFinishTime;
 
     dbUpdates.updated_at = new Date().toISOString();
 

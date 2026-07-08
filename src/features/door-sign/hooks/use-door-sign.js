@@ -20,6 +20,9 @@ const DEFAULT_STATE = {
 	theme: "dark", // 'dark' | 'light'
 	finishTime: "",
 	customPresets: [], // Array of { id, label, defaultSubText, icon: "Clock", isCustom: true }
+	scheduledStatusId: null,
+	scheduledStartTime: null,
+	scheduledFinishTime: null,
 	lastUpdated: null,
 };
 
@@ -40,6 +43,9 @@ export function useDoorSign(userId = "default") {
 			theme: dbRow.theme || "dark",
 			finishTime: dbRow.finish_time || "",
 			customPresets: dbRow.custom_presets || [],
+			scheduledStatusId: dbRow.scheduled_status_id || null,
+			scheduledStartTime: dbRow.scheduled_start_time || null,
+			scheduledFinishTime: dbRow.scheduled_finish_time || null,
 			lastUpdated: dbRow.updated_at,
 		};
 	};
@@ -150,24 +156,14 @@ export function useDoorSign(userId = "default") {
 	}, [userId]);
 
 	useEffect(() => {
-		if (state.statusId === "available" || !state.finishTime) return;
+		// If both active status is available (no active timer) and no pending schedule exists, exit early
+		if (state.statusId === "available" && !state.scheduledStatusId) return;
 
-		const checkExpiry = () => {
+		const checkExpiryAndSchedule = () => {
 			const now = new Date();
-			const match = state.finishTime.match(/^(\d+):(\d+)\s*(AM|PM)$/i);
-			if (!match) return;
 
-			let hours = parseInt(match[1], 10);
-			const minutes = parseInt(match[2], 10);
-			const ampm = match[3].toUpperCase();
-
-			if (ampm === "PM" && hours < 12) hours += 12;
-			if (ampm === "AM" && hours === 12) hours = 0;
-
-			const target = new Date(now.getTime());
-			target.setHours(hours, minutes, 0, 0);
-
-			// Check if status is from a different calendar day
+			// 1. Check if the status update was from a different day.
+			// If so, clear everything (revert to available, clear active timer, clear schedule)
 			const lastUpdatedDate = state.lastUpdated ? new Date(state.lastUpdated) : null;
 			const isDifferentDay = lastUpdatedDate && (
 				lastUpdatedDate.getDate() !== now.getDate() ||
@@ -176,27 +172,77 @@ export function useDoorSign(userId = "default") {
 			);
 
 			if (isDifferentDay) {
-				updateStatus("available");
+				updateSettings({
+					statusId: "available",
+					finishTime: "",
+					scheduledStatusId: null,
+					scheduledStartTime: null,
+					scheduledFinishTime: null,
+				});
 				return;
 			}
 
-			let diff = target.getTime() - now.getTime();
-			// If target is in the past by more than 6 hours, assume it was set for tomorrow morning
-			if (diff < -6 * 60 * 60 * 1000) {
-				target.setDate(target.getDate() + 1);
-				diff = target.getTime() - now.getTime();
+			// Helper to get target Date for comparison
+			const getTargetDate = (timeStr) => {
+				const match = timeStr.match(/^(\d+):(\d+)\s*(AM|PM)$/i);
+				if (!match) return null;
+
+				let hours = parseInt(match[1], 10);
+				const minutes = parseInt(match[2], 10);
+				const ampm = match[3].toUpperCase();
+
+				if (ampm === "PM" && hours < 12) hours += 12;
+				if (ampm === "AM" && hours === 12) hours = 0;
+
+				const target = new Date(now.getTime());
+				target.setHours(hours, minutes, 0, 0);
+
+				let diff = target.getTime() - now.getTime();
+				if (diff < -6 * 60 * 60 * 1000) {
+					target.setDate(target.getDate() + 1);
+				}
+				return target;
+			};
+
+			// 2. Check Upcoming Schedule
+			if (state.scheduledStatusId && state.scheduledStartTime) {
+				const startTarget = getTargetDate(state.scheduledStartTime);
+				if (startTarget && now.getTime() >= startTarget.getTime()) {
+					// Activate the scheduled status in a single DB write
+					updateSettings({
+						statusId: state.scheduledStatusId,
+						finishTime: state.scheduledFinishTime || "",
+						scheduledStatusId: null,
+						scheduledStartTime: null,
+						scheduledFinishTime: null,
+					});
+					return;
+				}
 			}
 
-			if (diff <= 0) {
-				updateStatus("available");
+			// 3. Check Active Expiry
+			if (state.statusId !== "available" && state.finishTime) {
+				const endTarget = getTargetDate(state.finishTime);
+				if (endTarget && now.getTime() >= endTarget.getTime()) {
+					// Active status expired, revert to available
+					updateStatus("available");
+				}
 			}
 		};
 
-		// Run check immediately and then every 10 seconds
-		checkExpiry();
-		const interval = setInterval(checkExpiry, 10000);
+		checkExpiryAndSchedule();
+		const interval = setInterval(checkExpiryAndSchedule, 10000);
 		return () => clearInterval(interval);
-	}, [state.statusId, state.finishTime, state.lastUpdated, updateStatus]);
+	}, [
+		state.statusId,
+		state.finishTime,
+		state.scheduledStatusId,
+		state.scheduledStartTime,
+		state.scheduledFinishTime,
+		state.lastUpdated,
+		updateStatus,
+		updateSettings,
+	]);
 
 	const allPresets = [
 		...STATUS_PRESETS.filter((p) => !state.presetsOverrides?.[p.id]?.isDeleted),

@@ -6,7 +6,7 @@ import * as Icons from "lucide-react";
 import {Button} from "@/components/ui/button";
 import NoSleep from "nosleep.js";
 
-export function DoorSignDisplay({state, currentPreset, onUnlock}) {
+export function DoorSignDisplay({state, currentPreset, presets = [], onUnlock}) {
 	const [time, setTime] = useState("");
 	const [date, setDate] = useState("");
 
@@ -292,6 +292,32 @@ export function DoorSignDisplay({state, currentPreset, onUnlock}) {
 							Available After:{" "}
 							<span className={`font-bold ${valueColorClass}`}>
 								{state.finishTime}
+							</span>
+						</span>
+					</div>
+				)}
+
+				{/* Upcoming Scheduled Status */}
+				{state.scheduledStatusId && (
+					<div
+						className={`mt-6 border-t border-b ${isLight ? "border-blue-300 text-blue-800" : "border-blue-900 text-blue-400"} p-2 text-sm md:text-base font-medium flex items-center gap-2.5`}
+					>
+						<Icons.Calendar
+							className={`h-5 w-5 ${isLight ? "text-blue-500" : "text-blue-400"} animate-pulse`}
+							style={{animationDuration: "2s"}}
+						/>
+						<span className="text-2xl">
+							Next status:{" "}
+							<span className={`font-extrabold ${isLight ? "text-blue-900" : "text-white"}`}>
+								"
+								{state.presetsOverrides?.[state.scheduledStatusId]?.title ||
+									presets.find((p) => p.id === state.scheduledStatusId)?.label ||
+									state.scheduledStatusId}
+								"
+							</span>{" "}
+							at{" "}
+							<span className={`font-bold ${isLight ? "text-blue-900" : "text-white"}`}>
+								{state.scheduledStartTime}
 							</span>
 						</span>
 					</div>

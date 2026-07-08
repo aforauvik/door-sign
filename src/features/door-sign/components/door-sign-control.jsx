@@ -45,6 +45,7 @@ export function DoorSignControl({
 	const [activeTheme, setActiveTheme] = useState(state.theme || "dark");
 	const [pinError, setPinError] = useState("");
 	const [finishTime, setFinishTime] = useState(state.finishTime || "");
+	const [startTime, setStartTime] = useState("");
 	const [editingPreset, setEditingPreset] = useState(null);
 	const [launchModalPreset, setLaunchModalPreset] = useState(null);
 	const [isAddPresetOpen, setIsAddPresetOpen] = useState(false);
@@ -54,9 +55,9 @@ export function DoorSignControl({
 
 	const activePreset = presets.find((p) => p.id === selectedId) || presets[0];
 
-	// Parse finishTime into separate hour, minute, ampm states
-	const parseFinishTime = (timeStr) => {
-		if (!timeStr) return {hour: "", minute: "", ampm: "", isSet: false};
+	// Parse a time string (e.g. "2:00 PM") into separate components
+	const parseTime = (timeStr) => {
+		if (!timeStr || timeStr.toLowerCase() === "now") return {hour: "", minute: "", ampm: "", isSet: false};
 		const match = timeStr.match(/^(\d+):(\d+)\s*(AM|PM)$/i);
 		if (!match) return {hour: "", minute: "", ampm: "", isSet: false};
 		return {
@@ -82,13 +83,52 @@ export function DoorSignControl({
 		return {hour: hours, minute: minutesStr, ampm};
 	};
 
-	const {hour, minute, ampm, isSet} = parseFinishTime(finishTime);
+	const startTimeParsed = parseTime(startTime);
+	const finishTimeParsed = parseTime(finishTime);
 
-	const handleTimePickerChange = (newHour, newMinute, newAmpm) => {
+	// Check if end time is backward from start time
+	const isTimeRangeInvalid = () => {
+		if (!finishTime) return false;
+
+		const getMinutes = (timeString) => {
+			if (!timeString || timeString.toLowerCase() === "now") {
+				const d = new Date();
+				return d.getHours() * 60 + d.getMinutes();
+			}
+			const match = timeString.match(/^(\d+):(\d+)\s*(AM|PM)$/i);
+			if (!match) return 0;
+
+			let hours = parseInt(match[1], 10);
+			const minutes = parseInt(match[2], 10);
+			const ampm = match[3].toUpperCase();
+
+			if (ampm === "PM" && hours < 12) hours += 12;
+			if (ampm === "AM" && hours === 12) hours = 0;
+
+			return hours * 60 + minutes;
+		};
+
+		const startMins = getMinutes(startTime);
+		const endMins = getMinutes(finishTime);
+
+		return endMins <= startMins;
+	};
+
+	const rangeInvalid = isTimeRangeInvalid();
+
+	const handleStartTimePickerChange = (newHour, newMinute, newAmpm) => {
 		const current = getCurrentTimeComponents();
-		const h = newHour || hour || current.hour;
-		const m = newMinute || minute || current.minute;
-		const a = newAmpm || ampm || current.ampm;
+		const h = newHour || startTimeParsed.hour || current.hour;
+		const m = newMinute || startTimeParsed.minute || current.minute;
+		const a = newAmpm || startTimeParsed.ampm || current.ampm;
+		setStartTime(`${h}:${m} ${a}`);
+	};
+
+	const handleFinishTimePickerChange = (newHour, newMinute, newAmpm) => {
+		const current = getCurrentTimeComponents();
+		const h = newHour || finishTimeParsed.hour || current.hour;
+		const m = newMinute || finishTimeParsed.minute || current.minute;
+		const a = newAmpm || finishTimeParsed.ampm || current.ampm;
 		handleFinishTimeChange(`${h}:${m} ${a}`);
 	};
 
@@ -118,11 +158,27 @@ export function DoorSignControl({
 	const handleStatusSelect = (id) => {
 		const preset = presets.find((p) => p.id === id);
 		setFinishTime(state.statusId === id ? state.finishTime || "" : "");
+		setStartTime("");
 		setLaunchModalPreset(preset);
 	};
 
-	const getReturnTimeStr = (minutesToAdd) => {
+	const getReturnTimeStr = (minutesToAdd, baseTimeStr = "") => {
 		const d = new Date();
+
+		if (baseTimeStr && baseTimeStr.toLowerCase() !== "now") {
+			const match = baseTimeStr.match(/^(\d+):(\d+)\s*(AM|PM)$/i);
+			if (match) {
+				let hours = parseInt(match[1], 10);
+				const minutes = parseInt(match[2], 10);
+				const ampm = match[3].toUpperCase();
+
+				if (ampm === "PM" && hours < 12) hours += 12;
+				if (ampm === "AM" && hours === 12) hours = 0;
+
+				d.setHours(hours, minutes, 0, 0);
+			}
+		}
+
 		d.setMinutes(d.getMinutes() + minutesToAdd);
 
 		let hours = d.getHours();
@@ -142,16 +198,31 @@ export function DoorSignControl({
 		if (launchModalPreset) {
 			const presetId = launchModalPreset.id;
 			setLaunchModalPreset(null);
-			updateStatus(presetId, "", "");
-			updateSettings({
-				finishTime: finishTime,
-			});
+
+			if (startTime) {
+				// Future Schedule
+				updateSettings({
+					scheduledStatusId: presetId,
+					scheduledStartTime: startTime,
+					scheduledFinishTime: finishTime || "",
+				});
+			} else {
+				// Immediate Activation
+				updateSettings({
+					statusId: presetId,
+					finishTime: finishTime || "",
+					scheduledStatusId: null,
+					scheduledStartTime: null,
+					scheduledFinishTime: null,
+				});
+			}
 		}
 	};
 
 	const handleCancelPresetDialog = () => {
 		setLaunchModalPreset(null);
 		setFinishTime(state.finishTime || "");
+		setStartTime("");
 	};
 
 	const handleDirectLaunch = () => {
@@ -219,8 +290,8 @@ export function DoorSignControl({
 		? "text-lg font-medium text-zinc-800"
 		: "text-lg font-medium text-zinc-300";
 	const modalLabelClass = isLight
-		? "text-xs font-semibold text-zinc-700"
-		: "text-xs font-semibold text-zinc-400";
+		? "text-sm font-semibold"
+		: "text-sm font-semibold";
 	const modalSubLabelClass = isLight
 		? "text-[11px] text-zinc-400"
 		: "text-[11px] text-zinc-500";
@@ -421,9 +492,62 @@ export function DoorSignControl({
 							"User"}
 					</h2>
 					<p className={`${descTextClass} text-sm`}>
-						Select your status and configure display preferences.
+						Let everyone know what's happening!
 					</p>
 				</div>
+
+				{state.scheduledStatusId && (
+					<div
+						className={`flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl border transition-all ${
+							isLight
+								? "bg-blue-50/50 border-blue-100 text-blue-800"
+								: "bg-blue-950/15 border-blue-900/30 text-blue-300"
+						}`}
+					>
+						<div className="flex items-center gap-3">
+							<div className={`p-2 rounded-lg ${isLight ? "bg-blue-100/60 text-blue-600" : "bg-blue-950/40 text-blue-400"}`}>
+								<Icons.Calendar className="h-5 w-5" />
+							</div>
+							<div className="flex flex-col">
+								<span className="text-sm font-bold leading-snug">
+									Upcoming Scheduled Status
+								</span>
+								<span className={`text-xs ${isLight ? "text-blue-650" : "text-blue-400"} mt-0.5`}>
+									Preset{" "}
+									<strong className={`font-semibold ${isLight ? "text-blue-900" : "text-white"}`}>
+										"
+										{state.presetsOverrides?.[state.scheduledStatusId]?.title ||
+											presets.find((p) => p.id === state.scheduledStatusId)?.label ||
+											state.scheduledStatusId}
+										"
+									</strong>{" "}
+									is scheduled to run from{" "}
+									<strong className={`font-extrabold ${isLight ? "text-blue-900" : "text-white"}`}>
+										{state.scheduledStartTime}
+									</strong>{" "}
+									to{" "}
+									<strong className={`font-extrabold ${isLight ? "text-blue-900" : "text-white"}`}>
+										{state.scheduledFinishTime || "Unspecified"}
+									</strong>
+								</span>
+							</div>
+						</div>
+						<Button
+							variant="ghost"
+							size="sm"
+							onClick={() => {
+								updateSettings({
+									scheduledStatusId: null,
+									scheduledStartTime: null,
+									scheduledFinishTime: null,
+								});
+							}}
+							className="rounded-lg h-9 px-3.5 font-bold text-red-500 hover:text-red-400 hover:bg-red-500/10 transition-all shrink-0 border border-transparent hover:border-red-500/10"
+						>
+							Cancel Schedule
+						</Button>
+					</div>
+				)}
 
 				{/* Presets Grid */}
 				<section className="space-y-6">
@@ -506,6 +630,15 @@ export function DoorSignControl({
 														• Until {state.finishTime}
 													</span>
 												)}
+											</span>
+										)}
+										{!isActive && state.scheduledStatusId === preset.id && (
+											<span className="text-[10px] uppercase font-bold tracking-wider text-blue-500 flex items-center gap-1.5 mb-0.5 flex-wrap">
+												<Icons.Calendar className="h-3 w-3 animate-pulse" />
+												Scheduled
+												<span className="normal-case font-semibold text-blue-600 dark:text-blue-400/90 ml-1">
+													• {state.scheduledStartTime} - {state.scheduledFinishTime || "Unspecified"}
+												</span>
 											</span>
 										)}
 										<span
@@ -657,208 +790,450 @@ export function DoorSignControl({
 								</div>
 							</div>
 
-							{/* End Time controls (Only shown if status is not 'available') */}
+							{/* Time controls (Only shown if status is not 'available') */}
 							{launchModalPreset.id !== "available" && (
-								<div className="space-y-3">
-									<div className="flex flex-col gap-1">
-										<label className={modalLabelClass}>
-											Select custom time
-										</label>
-										<p className={modalSubLabelClass}>
-											Indicate when you expect to finish this status.
-										</p>
-									</div>
+								<div className="space-y-4">
+									{/* Start Time Section */}
+									<div className="space-y-3">
+										<div className="flex flex-col gap-1">
+											<label className={modalLabelClass}>Status Start Time</label>
+											<p className={modalSubLabelClass}>
+												Indicate when you expect this status to begin (or leave as Now)
+											</p>
+										</div>
 
-									<div className="flex w-full gap-2">
-										{[15, 30, 45, 60, 120].map((mins) => {
-											const label = mins >= 60 ? `${mins / 60}h` : `${mins}m`;
-											return (
-												<Button
-													key={mins}
-													variant="outline"
-													onClick={() =>
-														handleFinishTimeChange(getReturnTimeStr(mins))
-													}
-													className={`${modalTimeBtnClass} flex-1 h-9 text-xs sm:text-sm font-semibold rounded-md`}
-												>
-													+{label}
-												</Button>
-											);
-										})}
-									</div>
+										<div className="flex w-full gap-2">
+											{[
+												{ mins: 0, label: "Now" },
+												{ mins: 15, label: "+15m" },
+												{ mins: 30, label: "+30m" },
+												{ mins: 60, label: "+1h" },
+												{ mins: 120, label: "+2h" }
+											].map(({ mins, label }) => {
+												const targetTimeStr = mins === 0 ? "" : getReturnTimeStr(mins);
+												const isSelected = (!startTime && mins === 0) || (startTime === targetTimeStr);
+												return (
+													<Button
+														key={mins}
+														variant="outline"
+														onClick={() => {
+															setStartTime(targetTimeStr);
+															// Reset finish time when changing start time to avoid stale offsets
+															setFinishTime("");
+														}}
+														className={`${modalTimeBtnClass} flex-1 h-9 text-xs sm:text-sm font-semibold rounded-md ${
+															isSelected
+																? isLight
+																	? "bg-emerald-100/80 border-emerald-300 text-emerald-800"
+																	: "bg-emerald-950/60 border-emerald-800 text-emerald-400"
+																: ""
+														}`}
+													>
+														{label}
+													</Button>
+												);
+											})}
+										</div>
 
-									<div className="flex items-center gap-3 py-0 mt-1.5">
-										<div
-											className={`h-px flex-1 ${isLight ? "bg-zinc-200" : "bg-zinc-800"}`}
-										/>
-										<span className="text-[10px] font-bold tracking-wider uppercase text-zinc-400 dark:text-zinc-500">
-											or
-										</span>
-										<div
-											className={`h-px flex-1 ${isLight ? "bg-zinc-200" : "bg-zinc-800"}`}
-										/>
-									</div>
+										<div className="flex items-center gap-3 py-0 mt-1.5">
+											<div className={`h-px flex-1 ${isLight ? "bg-zinc-200" : "bg-zinc-800"}`} />
+											<span className="text-[10px] font-bold tracking-wider uppercase text-zinc-400 dark:text-zinc-500">
+												or
+											</span>
+											<div className={`h-px flex-1 ${isLight ? "bg-zinc-200" : "bg-zinc-800"}`} />
+										</div>
 
-									<div className="flex gap-2 justify-center items-center mt-1.5 w-full">
-										{/* Hour Select */}
-										<div className="relative flex-1 flex items-center">
-											<Icons.Clock className="absolute left-3 h-4 w-4 text-zinc-500 pointer-events-none z-10" />
-											<Select
-												value={isSet ? hour : ""}
-												onValueChange={(val) =>
-													handleTimePickerChange(val, "", "")
-												}
-											>
-												<SelectTrigger
-													className={`pl-9 pr-3 !h-9 w-full rounded-md border ${
-														isLight
-															? "border-zinc-200 bg-zinc-50 text-zinc-900 data-[placeholder]:text-zinc-400"
-															: "border-zinc-800 bg-zinc-950 text-zinc-200 data-[placeholder]:text-zinc-400"
-													} text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/25 cursor-pointer`}
+										<div className="flex gap-2 justify-center items-center mt-1.5 w-full">
+											{/* Start Hour Select */}
+											<div className="relative flex-1 flex items-center">
+												<Icons.Clock className="absolute left-3 h-4 w-4 text-zinc-500 pointer-events-none z-10" />
+												<Select
+													value={startTimeParsed.isSet ? startTimeParsed.hour : ""}
+													onValueChange={(val) => {
+														handleStartTimePickerChange(val, "", "");
+														setFinishTime("");
+													}}
 												>
-													<SelectValue placeholder="Hour" />
-												</SelectTrigger>
-												<SelectContent
-													className={
-														isLight
-															? "bg-white text-zinc-900 border-zinc-200"
-															: "bg-zinc-950 text-zinc-200 border-zinc-800"
-													}
+													<SelectTrigger
+														className={`pl-9 pr-3 !h-9 w-full rounded-md border ${
+															isLight
+																? "border-zinc-200 bg-zinc-50 text-zinc-900 data-[placeholder]:text-zinc-400"
+																: "border-zinc-800 bg-zinc-950 text-zinc-200 data-[placeholder]:text-zinc-400"
+														} text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/25 cursor-pointer`}
+													>
+														<SelectValue placeholder="Hour" />
+													</SelectTrigger>
+													<SelectContent
+														className={
+															isLight
+																? "bg-white text-zinc-900 border-zinc-200"
+																: "bg-zinc-950 text-zinc-200 border-zinc-800"
+														}
+													>
+														{Array.from({length: 12}, (_, i) =>
+															(i + 1).toString(),
+														).map((h) => (
+															<SelectItem
+																key={h}
+																value={h}
+																className={
+																	isLight
+																		? "hover:bg-zinc-100 text-zinc-900"
+																		: "hover:bg-zinc-900 text-zinc-200"
+																}
+															>
+																{h}
+															</SelectItem>
+														))}
+													</SelectContent>
+												</Select>
+											</div>
+
+											<span className="text-sm font-bold text-zinc-400">:</span>
+
+											{/* Start Minute Select */}
+											<div className="relative flex-1 flex items-center">
+												<Select
+													value={startTimeParsed.isSet ? startTimeParsed.minute : ""}
+													onValueChange={(val) => {
+														handleStartTimePickerChange("", val, "");
+														setFinishTime("");
+													}}
 												>
-													{Array.from({length: 12}, (_, i) =>
-														(i + 1).toString(),
-													).map((h) => (
+													<SelectTrigger
+														className={`pl-3 pr-3 !h-9 w-full rounded-md border ${
+															isLight
+																? "border-zinc-200 bg-zinc-50 text-zinc-900 data-[placeholder]:text-zinc-400"
+																: "border-zinc-800 bg-zinc-950 text-zinc-200 data-[placeholder]:text-zinc-400"
+														} text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/25 cursor-pointer`}
+													>
+														<SelectValue placeholder="Min" />
+													</SelectTrigger>
+													<SelectContent
+														className={
+															isLight
+																? "bg-white text-zinc-900 border-zinc-200"
+																: "bg-zinc-950 text-zinc-200 border-zinc-800"
+														}
+													>
+														{Array.from({length: 12}, (_, i) =>
+															(i * 5).toString().padStart(2, "0"),
+														).map((m) => (
+															<SelectItem
+																key={m}
+																value={m}
+																className={
+																	isLight
+																		? "hover:bg-zinc-100 text-zinc-900"
+																		: "hover:bg-zinc-900 text-zinc-200"
+																}
+															>
+																{m}
+															</SelectItem>
+														))}
+													</SelectContent>
+												</Select>
+											</div>
+
+											{/* Start AM/PM Select */}
+											<div className="relative flex-1 flex items-center">
+												<Select
+													value={startTimeParsed.isSet ? startTimeParsed.ampm : ""}
+													onValueChange={(val) => {
+														handleStartTimePickerChange("", "", val);
+														setFinishTime("");
+													}}
+												>
+													<SelectTrigger
+														className={`pl-3 pr-3 !h-9 w-full rounded-md border ${
+															isLight
+																? "border-zinc-200 bg-zinc-50 text-zinc-900 data-[placeholder]:text-zinc-400"
+																: "border-zinc-800 bg-zinc-950 text-zinc-200 data-[placeholder]:text-zinc-400"
+														} text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/25 cursor-pointer`}
+													>
+														<SelectValue placeholder="AM/PM" />
+													</SelectTrigger>
+													<SelectContent
+														className={
+															isLight
+																? "bg-white text-zinc-900 border-zinc-200"
+																: "bg-zinc-950 text-zinc-200 border-zinc-800"
+														}
+													>
 														<SelectItem
-															key={h}
-															value={h}
+															value="AM"
 															className={
 																isLight
 																	? "hover:bg-zinc-100 text-zinc-900"
 																	: "hover:bg-zinc-900 text-zinc-200"
 															}
 														>
-															{h}
+															AM
 														</SelectItem>
-													))}
-												</SelectContent>
-											</Select>
-										</div>
-
-										<span className="text-sm font-bold text-zinc-400">:</span>
-
-										{/* Minute Select */}
-										<div className="relative flex-1 flex items-center">
-											<Select
-												value={isSet ? minute : ""}
-												onValueChange={(val) =>
-													handleTimePickerChange("", val, "")
-												}
-											>
-												<SelectTrigger
-													className={`pl-3 pr-3 !h-9 w-full rounded-md border ${
-														isLight
-															? "border-zinc-200 bg-zinc-50 text-zinc-900 data-[placeholder]:text-zinc-400"
-															: "border-zinc-800 bg-zinc-950 text-zinc-200 data-[placeholder]:text-zinc-400"
-													} text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/25 cursor-pointer`}
-												>
-													<SelectValue placeholder="Min" />
-												</SelectTrigger>
-												<SelectContent
-													className={
-														isLight
-															? "bg-white text-zinc-900 border-zinc-200"
-															: "bg-zinc-950 text-zinc-200 border-zinc-800"
-													}
-												>
-													{Array.from({length: 12}, (_, i) =>
-														(i * 5).toString().padStart(2, "0"),
-													).map((m) => (
 														<SelectItem
-															key={m}
-															value={m}
+															value="PM"
 															className={
 																isLight
 																	? "hover:bg-zinc-100 text-zinc-900"
 																	: "hover:bg-zinc-900 text-zinc-200"
 															}
 														>
-															{m}
+															PM
 														</SelectItem>
-													))}
-												</SelectContent>
-											</Select>
-										</div>
-
-										{/* AM/PM Select */}
-										<div className="relative flex-1 flex items-center">
-											<Select
-												value={isSet ? ampm : ""}
-												onValueChange={(val) =>
-													handleTimePickerChange("", "", val)
-												}
-											>
-												<SelectTrigger
-													className={`pl-3 pr-3 !h-9 w-full rounded-md border ${
-														isLight
-															? "border-zinc-200 bg-zinc-50 text-zinc-900 data-[placeholder]:text-zinc-400"
-															: "border-zinc-800 bg-zinc-950 text-zinc-200 data-[placeholder]:text-zinc-400"
-													} text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/25 cursor-pointer`}
-												>
-													<SelectValue placeholder="AM/PM" />
-												</SelectTrigger>
-												<SelectContent
-													className={
-														isLight
-															? "bg-white text-zinc-900 border-zinc-200"
-															: "bg-zinc-950 text-zinc-200 border-zinc-800"
-													}
-												>
-													<SelectItem
-														value="AM"
-														className={
-															isLight
-																? "hover:bg-zinc-100 text-zinc-900"
-																: "hover:bg-zinc-900 text-zinc-200"
-														}
-													>
-														AM
-													</SelectItem>
-													<SelectItem
-														value="PM"
-														className={
-															isLight
-																? "hover:bg-zinc-100 text-zinc-900"
-																: "hover:bg-zinc-900 text-zinc-200"
-														}
-													>
-														PM
-													</SelectItem>
-												</SelectContent>
-											</Select>
+													</SelectContent>
+												</Select>
+											</div>
 										</div>
 									</div>
 
-									{finishTime && (
+									{/* Divider line between start and end times */}
+									<div className={`h-px w-full ${isLight ? "bg-zinc-200" : "bg-zinc-800"} my-4`} />
+
+									{/* End Time Section */}
+									<div className="space-y-3">
+										<div className="flex flex-col gap-1">
+											<label className={modalLabelClass}>Status End Time</label>
+											<p className={modalSubLabelClass}>
+												{startTime ? "Indicate when you expect to finish this status" : "Indicate when you expect to finish this status"}
+											</p>
+										</div>
+
+										<div className="flex w-full gap-2">
+											{[15, 30, 45, 60, 120].map((mins) => {
+												const label = mins >= 60 ? `${mins / 60}h` : `${mins}m`;
+												const targetTimeStr = getReturnTimeStr(mins, startTime);
+												const isSelected = finishTime === targetTimeStr;
+												return (
+													<Button
+														key={mins}
+														variant="outline"
+														onClick={() => setFinishTime(targetTimeStr)}
+														className={`${modalTimeBtnClass} flex-1 h-9 text-xs sm:text-sm font-semibold rounded-md ${
+															isSelected
+																? isLight
+																	? "bg-emerald-100/80 border-emerald-300 text-emerald-800"
+																	: "bg-emerald-950/60 border-emerald-800 text-emerald-400"
+																: ""
+														}`}
+													>
+														+{label}
+													</Button>
+												);
+											})}
+										</div>
+
+										<div className="flex items-center gap-3 py-0 mt-1.5">
+											<div className={`h-px flex-1 ${isLight ? "bg-zinc-200" : "bg-zinc-800"}`} />
+											<span className="text-[10px] font-bold tracking-wider uppercase text-zinc-400 dark:text-zinc-500">
+												or
+											</span>
+											<div className={`h-px flex-1 ${isLight ? "bg-zinc-200" : "bg-zinc-800"}`} />
+										</div>
+
+										<div className="flex gap-2 justify-center items-center mt-1.5 w-full">
+											{/* End Hour Select */}
+											<div className="relative flex-1 flex items-center">
+												<Icons.Clock className="absolute left-3 h-4 w-4 text-zinc-500 pointer-events-none z-10" />
+												<Select
+													value={finishTimeParsed.isSet ? finishTimeParsed.hour : ""}
+													onValueChange={(val) =>
+														handleFinishTimePickerChange(val, "", "")
+													}
+												>
+													<SelectTrigger
+														className={`pl-9 pr-3 !h-9 w-full rounded-md border ${
+															isLight
+																? "border-zinc-200 bg-zinc-50 text-zinc-900 data-[placeholder]:text-zinc-400"
+																: "border-zinc-800 bg-zinc-950 text-zinc-200 data-[placeholder]:text-zinc-400"
+														} text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/25 cursor-pointer`}
+													>
+														<SelectValue placeholder="Hour" />
+													</SelectTrigger>
+													<SelectContent
+														className={
+															isLight
+																? "bg-white text-zinc-900 border-zinc-200"
+																: "bg-zinc-950 text-zinc-200 border-zinc-800"
+														}
+													>
+														{Array.from({length: 12}, (_, i) =>
+															(i + 1).toString(),
+														).map((h) => (
+															<SelectItem
+																key={h}
+																value={h}
+																className={
+																	isLight
+																		? "hover:bg-zinc-100 text-zinc-900"
+																		: "hover:bg-zinc-900 text-zinc-200"
+																}
+															>
+																{h}
+															</SelectItem>
+														))}
+													</SelectContent>
+												</Select>
+											</div>
+
+											<span className="text-sm font-bold text-zinc-400">:</span>
+
+											{/* End Minute Select */}
+											<div className="relative flex-1 flex items-center">
+												<Select
+													value={finishTimeParsed.isSet ? finishTimeParsed.minute : ""}
+													onValueChange={(val) =>
+														handleFinishTimePickerChange("", val, "")
+													}
+												>
+													<SelectTrigger
+														className={`pl-3 pr-3 !h-9 w-full rounded-md border ${
+															isLight
+																? "border-zinc-200 bg-zinc-50 text-zinc-900 data-[placeholder]:text-zinc-400"
+																: "border-zinc-800 bg-zinc-950 text-zinc-200 data-[placeholder]:text-zinc-400"
+														} text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/25 cursor-pointer`}
+													>
+														<SelectValue placeholder="Min" />
+													</SelectTrigger>
+													<SelectContent
+														className={
+															isLight
+																? "bg-white text-zinc-900 border-zinc-200"
+																: "bg-zinc-950 text-zinc-200 border-zinc-800"
+														}
+													>
+														{Array.from({length: 12}, (_, i) =>
+															(i * 5).toString().padStart(2, "0"),
+														).map((m) => (
+															<SelectItem
+																key={m}
+																value={m}
+																className={
+																	isLight
+																		? "hover:bg-zinc-100 text-zinc-900"
+																		: "hover:bg-zinc-900 text-zinc-200"
+																}
+															>
+																{m}
+															</SelectItem>
+														))}
+													</SelectContent>
+												</Select>
+											</div>
+
+											{/* End AM/PM Select */}
+											<div className="relative flex-1 flex items-center">
+												<Select
+													value={finishTimeParsed.isSet ? finishTimeParsed.ampm : ""}
+													onValueChange={(val) =>
+														handleFinishTimePickerChange("", "", val)
+													}
+												>
+													<SelectTrigger
+														className={`pl-3 pr-3 !h-9 w-full rounded-md border ${
+															isLight
+																? "border-zinc-200 bg-zinc-50 text-zinc-900 data-[placeholder]:text-zinc-400"
+																: "border-zinc-800 bg-zinc-950 text-zinc-200 data-[placeholder]:text-zinc-400"
+														} text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/25 cursor-pointer`}
+													>
+														<SelectValue placeholder="AM/PM" />
+													</SelectTrigger>
+													<SelectContent
+														className={
+															isLight
+																? "bg-white text-zinc-900 border-zinc-200"
+																: "bg-zinc-950 text-zinc-200 border-zinc-800"
+														}
+													>
+														<SelectItem
+															value="AM"
+															className={
+																isLight
+																	? "hover:bg-zinc-100 text-zinc-900"
+																	: "hover:bg-zinc-900 text-zinc-200"
+															}
+														>
+															AM
+														</SelectItem>
+														<SelectItem
+															value="PM"
+															className={
+																isLight
+																	? "hover:bg-zinc-100 text-zinc-900"
+																	: "hover:bg-zinc-900 text-zinc-200"
+															}
+														>
+															PM
+														</SelectItem>
+													</SelectContent>
+												</Select>
+											</div>
+										</div>
+									</div>
+
+									{/* Visual Confirmation Card */}
+									{(startTime || finishTime) && !rangeInvalid && (
 										<div
-											className={`flex items-center justify-between gap-3 p-3 rounded-xl border text-sm font-semibold ${isLight ? "bg-emerald-50/50 border-emerald-100 text-emerald-800" : "bg-emerald-950/20 border-emerald-900/30 text-emerald-400"}`}
+											className={`flex items-center justify-between gap-3 p-3 rounded-xl border text-sm font-semibold transition-all ${
+												startTime
+													? isLight
+														? "bg-blue-50/50 border-blue-100 text-blue-800"
+														: "bg-blue-950/20 border-blue-900/30 text-blue-400"
+													: isLight
+														? "bg-emerald-50/50 border-emerald-100 text-emerald-800"
+														: "bg-emerald-950/20 border-emerald-900/30 text-emerald-400"
+											}`}
 										>
 											<div className="flex items-center gap-2">
-												<Icons.Clock className="h-4 w-4 shrink-0 text-emerald-500" />
+												<Icons.Clock className={`h-4 w-4 shrink-0 ${startTime ? "text-blue-500" : "text-emerald-500"}`} />
 												<span>
-													Status will end at:{" "}
-													<strong className="text-base font-extrabold text-emerald-600 dark:text-emerald-400">
-														{finishTime}
-													</strong>
+													{startTime ? (
+														<>
+															Scheduled to run:{" "}
+															<strong className={`text-base font-extrabold ${startTime ? "text-blue-600 dark:text-blue-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+																{startTime}
+															</strong>{" "}
+															to{" "}
+															<strong className={`text-base font-extrabold ${startTime ? "text-blue-600 dark:text-blue-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+																{finishTime || "Unspecified"}
+															</strong>
+														</>
+													) : (
+														<>
+															Status will end at:{" "}
+															<strong className="text-base font-extrabold text-emerald-600 dark:text-emerald-400">
+																{finishTime}
+															</strong>
+														</>
+													)}
 												</span>
 											</div>
 											<Button
 												variant="ghost"
 												size="sm"
-												onClick={() => handleFinishTimeChange("")}
+												onClick={() => {
+													setFinishTime("");
+													setStartTime("");
+												}}
 												className="rounded-lg px-2.5 h-8 text-red-500 hover:text-red-400 hover:bg-red-500/10 font-semibold transition-all shrink-0"
 											>
 												Clear
 											</Button>
+										</div>
+									)}
+
+									{/* Invalid Time Range Alert */}
+									{rangeInvalid && (
+										<div
+											className={`flex items-center gap-2.5 p-3 rounded-xl border text-sm font-semibold transition-all ${
+												isLight
+													? "bg-red-50/50 border-red-100 text-red-800"
+													: "bg-red-950/20 border-red-900/30 text-red-400"
+											}`}
+										>
+											<Icons.AlertTriangle className="h-4 w-4 shrink-0 text-red-500 animate-bounce" />
+											<span>
+												End time must be later than start time.
+											</span>
 										</div>
 									)}
 								</div>
@@ -877,7 +1252,12 @@ export function DoorSignControl({
 							</Button>
 							<Button
 								onClick={handleActivatePreset}
-								className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold"
+								disabled={rangeInvalid}
+								className={`font-semibold ${
+									rangeInvalid
+										? "bg-zinc-300 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-500 opacity-60 cursor-not-allowed hover:bg-zinc-300 dark:hover:bg-zinc-800"
+										: "bg-emerald-600 hover:bg-emerald-500 text-white"
+								}`}
 							>
 								Activate
 							</Button>

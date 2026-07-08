@@ -66,6 +66,7 @@ export function DoorSignContainer({ userId, user }) {
 				<DoorSignDisplay
 					state={state}
 					currentPreset={currentPreset}
+					presets={presets}
 					onUnlock={handleUnlockTrigger}
 				/>
 			) : (
