@@ -10,7 +10,7 @@ export default function LoginPage() {
 					className="flex items-center gap-2 self-center font-medium text-zinc-200"
 				>
 					<Image
-						src="/logo.svg"
+						src="/logo-white.svg"
 						alt="Knock Later Logo"
 						width={50}
 						height={50}
