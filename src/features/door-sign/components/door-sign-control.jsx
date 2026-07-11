@@ -57,7 +57,8 @@ export function DoorSignControl({
 
 	// Parse a time string (e.g. "2:00 PM") into separate components
 	const parseTime = (timeStr) => {
-		if (!timeStr || timeStr.toLowerCase() === "now") return {hour: "", minute: "", ampm: "", isSet: false};
+		if (!timeStr || timeStr.toLowerCase() === "now")
+			return {hour: "", minute: "", ampm: "", isSet: false};
 		const match = timeStr.match(/^(\d+):(\d+)\s*(AM|PM)$/i);
 		if (!match) return {hour: "", minute: "", ampm: "", isSet: false};
 		return {
@@ -322,7 +323,7 @@ export function DoorSignControl({
 					<div className="flex items-center gap-2">
 						{/* <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" /> */}
 						<Image
-							src="/logo.svg"
+							src={isLight ? "logo-black.svg" : "logo-white.svg"}
 							alt="Knock Later Logo"
 							width={40}
 							height={40}
@@ -337,7 +338,11 @@ export function DoorSignControl({
 				</div>
 				<div className="flex items-center gap-2">
 					<Button
-						className="px-4 py-5 text-sm font-semibold text-white bg-emerald-500 border-emerald-500 hover:bg-emerald-600 hover:border-emerald-600 transition-all duration-500 border-1"
+						className={`px-4 py-5 text-sm font-semibold transition-all duration-500 border-1 ${
+							isLight
+								? "bg-zinc-950 text-white border-zinc-950 hover:bg-zinc-900 hover:border-zinc-900"
+								: "bg-white text-zinc-950 border-white hover:bg-zinc-100 hover:border-zinc-100"
+						}`}
 						onClick={handleDirectLaunch}
 					>
 						<Icons.Expand className="h-4 w-4" />
@@ -505,28 +510,39 @@ export function DoorSignControl({
 						}`}
 					>
 						<div className="flex items-center gap-3">
-							<div className={`p-2 rounded-lg ${isLight ? "bg-blue-100/60 text-blue-600" : "bg-blue-950/40 text-blue-400"}`}>
+							<div
+								className={`p-2 rounded-lg ${isLight ? "bg-blue-100/60 text-blue-600" : "bg-blue-950/40 text-blue-400"}`}
+							>
 								<Icons.Calendar className="h-5 w-5" />
 							</div>
 							<div className="flex flex-col">
 								<span className="text-sm font-bold leading-snug">
 									Upcoming Scheduled Status
 								</span>
-								<span className={`text-xs ${isLight ? "text-blue-650" : "text-blue-400"} mt-0.5`}>
+								<span
+									className={`text-xs ${isLight ? "text-blue-650" : "text-blue-400"} mt-0.5`}
+								>
 									Preset{" "}
-									<strong className={`font-semibold ${isLight ? "text-blue-900" : "text-white"}`}>
+									<strong
+										className={`font-semibold ${isLight ? "text-blue-900" : "text-white"}`}
+									>
 										"
 										{state.presetsOverrides?.[state.scheduledStatusId]?.title ||
-											presets.find((p) => p.id === state.scheduledStatusId)?.label ||
+											presets.find((p) => p.id === state.scheduledStatusId)
+												?.label ||
 											state.scheduledStatusId}
 										"
 									</strong>{" "}
 									is scheduled to run from{" "}
-									<strong className={`font-extrabold ${isLight ? "text-blue-900" : "text-white"}`}>
+									<strong
+										className={`font-extrabold ${isLight ? "text-blue-900" : "text-white"}`}
+									>
 										{state.scheduledStartTime}
 									</strong>{" "}
 									to{" "}
-									<strong className={`font-extrabold ${isLight ? "text-blue-900" : "text-white"}`}>
+									<strong
+										className={`font-extrabold ${isLight ? "text-blue-900" : "text-white"}`}
+									>
 										{state.scheduledFinishTime || "Unspecified"}
 									</strong>
 								</span>
@@ -637,7 +653,8 @@ export function DoorSignControl({
 												<Icons.Calendar className="h-3 w-3 animate-pulse" />
 												Scheduled
 												<span className="normal-case font-semibold text-blue-600 dark:text-blue-400/90 ml-1">
-													• {state.scheduledStartTime} - {state.scheduledFinishTime || "Unspecified"}
+													• {state.scheduledStartTime} -{" "}
+													{state.scheduledFinishTime || "Unspecified"}
 												</span>
 											</span>
 										)}
@@ -796,22 +813,28 @@ export function DoorSignControl({
 									{/* Start Time Section */}
 									<div className="space-y-3">
 										<div className="flex flex-col gap-1">
-											<label className={modalLabelClass}>Status Start Time</label>
+											<label className={modalLabelClass}>
+												Status Start Time
+											</label>
 											<p className={modalSubLabelClass}>
-												Indicate when you expect this status to begin (or leave as Now)
+												Indicate when you expect this status to begin (or leave
+												as Now)
 											</p>
 										</div>
 
 										<div className="flex w-full gap-2">
 											{[
-												{ mins: 0, label: "Now" },
-												{ mins: 15, label: "+15m" },
-												{ mins: 30, label: "+30m" },
-												{ mins: 60, label: "+1h" },
-												{ mins: 120, label: "+2h" }
-											].map(({ mins, label }) => {
-												const targetTimeStr = mins === 0 ? "" : getReturnTimeStr(mins);
-												const isSelected = (!startTime && mins === 0) || (startTime === targetTimeStr);
+												{mins: 0, label: "Now"},
+												{mins: 15, label: "+15m"},
+												{mins: 30, label: "+30m"},
+												{mins: 60, label: "+1h"},
+												{mins: 120, label: "+2h"},
+											].map(({mins, label}) => {
+												const targetTimeStr =
+													mins === 0 ? "" : getReturnTimeStr(mins);
+												const isSelected =
+													(!startTime && mins === 0) ||
+													startTime === targetTimeStr;
 												return (
 													<Button
 														key={mins}
@@ -836,11 +859,15 @@ export function DoorSignControl({
 										</div>
 
 										<div className="flex items-center gap-3 py-0 mt-1.5">
-											<div className={`h-px flex-1 ${isLight ? "bg-zinc-200" : "bg-zinc-800"}`} />
+											<div
+												className={`h-px flex-1 ${isLight ? "bg-zinc-200" : "bg-zinc-800"}`}
+											/>
 											<span className="text-[10px] font-bold tracking-wider uppercase text-zinc-400 dark:text-zinc-500">
 												or
 											</span>
-											<div className={`h-px flex-1 ${isLight ? "bg-zinc-200" : "bg-zinc-800"}`} />
+											<div
+												className={`h-px flex-1 ${isLight ? "bg-zinc-200" : "bg-zinc-800"}`}
+											/>
 										</div>
 
 										<div className="flex gap-2 justify-center items-center mt-1.5 w-full">
@@ -848,7 +875,9 @@ export function DoorSignControl({
 											<div className="relative flex-1 flex items-center">
 												<Icons.Clock className="absolute left-3 h-4 w-4 text-zinc-500 pointer-events-none z-10" />
 												<Select
-													value={startTimeParsed.isSet ? startTimeParsed.hour : ""}
+													value={
+														startTimeParsed.isSet ? startTimeParsed.hour : ""
+													}
 													onValueChange={(val) => {
 														handleStartTimePickerChange(val, "", "");
 														setFinishTime("");
@@ -894,7 +923,9 @@ export function DoorSignControl({
 											{/* Start Minute Select */}
 											<div className="relative flex-1 flex items-center">
 												<Select
-													value={startTimeParsed.isSet ? startTimeParsed.minute : ""}
+													value={
+														startTimeParsed.isSet ? startTimeParsed.minute : ""
+													}
 													onValueChange={(val) => {
 														handleStartTimePickerChange("", val, "");
 														setFinishTime("");
@@ -938,7 +969,9 @@ export function DoorSignControl({
 											{/* Start AM/PM Select */}
 											<div className="relative flex-1 flex items-center">
 												<Select
-													value={startTimeParsed.isSet ? startTimeParsed.ampm : ""}
+													value={
+														startTimeParsed.isSet ? startTimeParsed.ampm : ""
+													}
 													onValueChange={(val) => {
 														handleStartTimePickerChange("", "", val);
 														setFinishTime("");
@@ -987,14 +1020,18 @@ export function DoorSignControl({
 									</div>
 
 									{/* Divider line between start and end times */}
-									<div className={`h-px w-full ${isLight ? "bg-zinc-200" : "bg-zinc-800"} my-4`} />
+									<div
+										className={`h-px w-full ${isLight ? "bg-zinc-200" : "bg-zinc-800"} my-4`}
+									/>
 
 									{/* End Time Section */}
 									<div className="space-y-3">
 										<div className="flex flex-col gap-1">
 											<label className={modalLabelClass}>Status End Time</label>
 											<p className={modalSubLabelClass}>
-												{startTime ? "Indicate when you expect to finish this status" : "Indicate when you expect to finish this status"}
+												{startTime
+													? "Indicate when you expect to finish this status"
+													: "Indicate when you expect to finish this status"}
 											</p>
 										</div>
 
@@ -1023,11 +1060,15 @@ export function DoorSignControl({
 										</div>
 
 										<div className="flex items-center gap-3 py-0 mt-1.5">
-											<div className={`h-px flex-1 ${isLight ? "bg-zinc-200" : "bg-zinc-800"}`} />
+											<div
+												className={`h-px flex-1 ${isLight ? "bg-zinc-200" : "bg-zinc-800"}`}
+											/>
 											<span className="text-[10px] font-bold tracking-wider uppercase text-zinc-400 dark:text-zinc-500">
 												or
 											</span>
-											<div className={`h-px flex-1 ${isLight ? "bg-zinc-200" : "bg-zinc-800"}`} />
+											<div
+												className={`h-px flex-1 ${isLight ? "bg-zinc-200" : "bg-zinc-800"}`}
+											/>
 										</div>
 
 										<div className="flex gap-2 justify-center items-center mt-1.5 w-full">
@@ -1035,7 +1076,9 @@ export function DoorSignControl({
 											<div className="relative flex-1 flex items-center">
 												<Icons.Clock className="absolute left-3 h-4 w-4 text-zinc-500 pointer-events-none z-10" />
 												<Select
-													value={finishTimeParsed.isSet ? finishTimeParsed.hour : ""}
+													value={
+														finishTimeParsed.isSet ? finishTimeParsed.hour : ""
+													}
 													onValueChange={(val) =>
 														handleFinishTimePickerChange(val, "", "")
 													}
@@ -1080,7 +1123,11 @@ export function DoorSignControl({
 											{/* End Minute Select */}
 											<div className="relative flex-1 flex items-center">
 												<Select
-													value={finishTimeParsed.isSet ? finishTimeParsed.minute : ""}
+													value={
+														finishTimeParsed.isSet
+															? finishTimeParsed.minute
+															: ""
+													}
 													onValueChange={(val) =>
 														handleFinishTimePickerChange("", val, "")
 													}
@@ -1123,7 +1170,9 @@ export function DoorSignControl({
 											{/* End AM/PM Select */}
 											<div className="relative flex-1 flex items-center">
 												<Select
-													value={finishTimeParsed.isSet ? finishTimeParsed.ampm : ""}
+													value={
+														finishTimeParsed.isSet ? finishTimeParsed.ampm : ""
+													}
 													onValueChange={(val) =>
 														handleFinishTimePickerChange("", "", val)
 													}
@@ -1184,16 +1233,22 @@ export function DoorSignControl({
 											}`}
 										>
 											<div className="flex items-center gap-2">
-												<Icons.Clock className={`h-4 w-4 shrink-0 ${startTime ? "text-blue-500" : "text-emerald-500"}`} />
+												<Icons.Clock
+													className={`h-4 w-4 shrink-0 ${startTime ? "text-blue-500" : "text-emerald-500"}`}
+												/>
 												<span>
 													{startTime ? (
 														<>
 															Scheduled to run:{" "}
-															<strong className={`text-base font-extrabold ${startTime ? "text-blue-600 dark:text-blue-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+															<strong
+																className={`text-base font-extrabold ${startTime ? "text-blue-600 dark:text-blue-400" : "text-emerald-600 dark:text-emerald-400"}`}
+															>
 																{startTime}
 															</strong>{" "}
 															to{" "}
-															<strong className={`text-base font-extrabold ${startTime ? "text-blue-600 dark:text-blue-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+															<strong
+																className={`text-base font-extrabold ${startTime ? "text-blue-600 dark:text-blue-400" : "text-emerald-600 dark:text-emerald-400"}`}
+															>
 																{finishTime || "Unspecified"}
 															</strong>
 														</>
@@ -1231,9 +1286,7 @@ export function DoorSignControl({
 											}`}
 										>
 											<Icons.AlertTriangle className="h-4 w-4 shrink-0 text-red-500 animate-bounce" />
-											<span>
-												End time must be later than start time.
-											</span>
+											<span>End time must be later than start time.</span>
 										</div>
 									)}
 								</div>
@@ -1253,10 +1306,14 @@ export function DoorSignControl({
 							<Button
 								onClick={handleActivatePreset}
 								disabled={rangeInvalid}
-								className={`font-semibold ${
+								className={`font-semibold transition-all duration-300 ${
 									rangeInvalid
-										? "bg-zinc-300 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-500 opacity-60 cursor-not-allowed hover:bg-zinc-300 dark:hover:bg-zinc-800"
-										: "bg-emerald-600 hover:bg-emerald-500 text-white"
+										? isLight
+											? "bg-zinc-200 text-zinc-400 cursor-not-allowed hover:bg-zinc-200"
+											: "bg-zinc-800 text-zinc-600 cursor-not-allowed hover:bg-zinc-800"
+										: isLight
+											? "bg-zinc-950 text-white hover:bg-zinc-900"
+											: "bg-white text-zinc-950 hover:bg-zinc-100"
 								}`}
 							>
 								Activate
@@ -1574,7 +1631,11 @@ function PresetEditDialog({
 						</Button>
 						<Button
 							onClick={handleSave}
-							className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold"
+							className={`font-semibold transition-all duration-300 ${
+								isLight
+									? "bg-zinc-950 text-white hover:bg-zinc-900"
+									: "bg-white text-zinc-950 hover:bg-zinc-100"
+							}`}
 						>
 							Save
 						</Button>
@@ -1645,7 +1706,7 @@ function AddPresetDialog({isOpen, onClose, isLight, onSave}) {
 						className={modalTitleClass}
 						style={{display: "flex", alignItems: "center", gap: "0.5rem"}}
 					>
-						<Icons.Clock className="h-5 w-5 text-emerald-500" />
+						<Icons.Clock className="h-5 w-5" />
 						Create Custom Preset
 					</DialogTitle>
 				</DialogHeader>
@@ -1710,7 +1771,11 @@ function AddPresetDialog({isOpen, onClose, isLight, onSave}) {
 					</Button>
 					<Button
 						onClick={handleSave}
-						className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold"
+						className={`font-semibold transition-all duration-300 ${
+							isLight
+								? "bg-zinc-950 text-white hover:bg-zinc-900"
+								: "bg-white text-zinc-950 hover:bg-zinc-100"
+						}`}
 					>
 						Create Preset
 					</Button>

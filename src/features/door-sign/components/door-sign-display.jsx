@@ -6,7 +6,12 @@ import * as Icons from "lucide-react";
 import {Button} from "@/components/ui/button";
 import NoSleep from "nosleep.js";
 
-export function DoorSignDisplay({state, currentPreset, presets = [], onUnlock}) {
+export function DoorSignDisplay({
+	state,
+	currentPreset,
+	presets = [],
+	onUnlock,
+}) {
 	const [time, setTime] = useState("");
 	const [date, setDate] = useState("");
 
@@ -222,13 +227,13 @@ export function DoorSignDisplay({state, currentPreset, presets = [], onUnlock}) 
 			<header className="z-10 flex flex-row items-center justify-between w-full">
 				<div className="flex items-center gap-2">
 					<Image
-						src="/logo.svg"
+						src={isLight ? "/logo-black.svg" : "/logo-white.svg"}
 						alt="Knock Later Logo"
 						width={40}
 						height={40}
 						className="h-8 w-8"
 					/>
-					<span className={`text-lg font-bold tracking-tight ${clockClass}`}>
+					<span className={`text-base font-bold ${clockClass}`}>
 						Knock Later
 					</span>
 				</div>
@@ -308,15 +313,20 @@ export function DoorSignDisplay({state, currentPreset, presets = [], onUnlock}) 
 						/>
 						<span className="text-2xl">
 							Next status:{" "}
-							<span className={`font-extrabold ${isLight ? "text-blue-900" : "text-white"}`}>
+							<span
+								className={`font-extrabold ${isLight ? "text-blue-900" : "text-white"}`}
+							>
 								"
 								{state.presetsOverrides?.[state.scheduledStatusId]?.title ||
-									presets.find((p) => p.id === state.scheduledStatusId)?.label ||
+									presets.find((p) => p.id === state.scheduledStatusId)
+										?.label ||
 									state.scheduledStatusId}
 								"
 							</span>{" "}
 							at{" "}
-							<span className={`font-bold ${isLight ? "text-blue-900" : "text-white"}`}>
+							<span
+								className={`font-bold ${isLight ? "text-blue-900" : "text-white"}`}
+							>
 								{state.scheduledStartTime}
 							</span>
 						</span>
