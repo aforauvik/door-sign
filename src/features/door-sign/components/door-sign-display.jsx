@@ -292,7 +292,7 @@ export function DoorSignDisplay({
 				{/* Approximate Finish Time */}
 				{state.finishTime && statusId !== "available" && (
 					<div
-						className={`mt-6 ${endsAroundClass} border-t border-b border-red-500 p-2 text-sm md:text-base font-medium flex items-center gap-2.5`}
+						className={`mt-6 ${endsAroundClass} border-t border-b ${themeConfig.bannerBorder || "border-zinc-800"} p-2 text-sm md:text-base font-medium flex items-center gap-2.5`}
 					>
 						<Icons.Timer
 							className={`h-5 w-5 ${timerIconClass} animate-pulse`}

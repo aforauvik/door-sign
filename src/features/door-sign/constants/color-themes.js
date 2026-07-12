@@ -13,6 +13,7 @@ export const COLOR_THEMES = {
       activeBadge: "text-emerald-600",
       activeBadgeSubtext: "text-emerald-600",
       activeTitle: "text-emerald-700 font-bold",
+      bannerBorder: "border-emerald-500",
     },
     dark: {
       bg: "bg-zinc-950",
@@ -27,6 +28,7 @@ export const COLOR_THEMES = {
       activeBadge: "text-emerald-400",
       activeBadgeSubtext: "text-emerald-400/90",
       activeTitle: "text-white font-bold",
+      bannerBorder: "border-emerald-500",
     }
   },
   amber: {
@@ -43,6 +45,7 @@ export const COLOR_THEMES = {
       activeBadge: "text-amber-600",
       activeBadgeSubtext: "text-amber-600",
       activeTitle: "text-amber-700 font-bold",
+      bannerBorder: "border-amber-500",
     },
     dark: {
       bg: "bg-zinc-950",
@@ -57,6 +60,7 @@ export const COLOR_THEMES = {
       activeBadge: "text-amber-500",
       activeBadgeSubtext: "text-amber-500/90",
       activeTitle: "text-white font-bold",
+      bannerBorder: "border-amber-500",
     }
   },
   red: {
@@ -73,6 +77,7 @@ export const COLOR_THEMES = {
       activeBadge: "text-red-600",
       activeBadgeSubtext: "text-red-600",
       activeTitle: "text-red-700 font-bold",
+      bannerBorder: "border-red-500",
     },
     dark: {
       bg: "bg-zinc-950",
@@ -87,6 +92,7 @@ export const COLOR_THEMES = {
       activeBadge: "text-red-400",
       activeBadgeSubtext: "text-red-400/90",
       activeTitle: "text-white font-bold",
+      bannerBorder: "border-red-500",
     }
   },
   blue: {
@@ -103,6 +109,7 @@ export const COLOR_THEMES = {
       activeBadge: "text-blue-600",
       activeBadgeSubtext: "text-blue-600",
       activeTitle: "text-blue-700 font-bold",
+      bannerBorder: "border-blue-500",
     },
     dark: {
       bg: "bg-zinc-950",
@@ -117,6 +124,7 @@ export const COLOR_THEMES = {
       activeBadge: "text-blue-400",
       activeBadgeSubtext: "text-blue-400/90",
       activeTitle: "text-white font-bold",
+      bannerBorder: "border-blue-500",
     }
   },
   purple: {
@@ -133,6 +141,7 @@ export const COLOR_THEMES = {
       activeBadge: "text-purple-600",
       activeBadgeSubtext: "text-purple-600",
       activeTitle: "text-purple-700 font-bold",
+      bannerBorder: "border-purple-500",
     },
     dark: {
       bg: "bg-zinc-950",
@@ -147,6 +156,7 @@ export const COLOR_THEMES = {
       activeBadge: "text-purple-400",
       activeBadgeSubtext: "text-purple-400/90",
       activeTitle: "text-white font-bold",
+      bannerBorder: "border-purple-500",
     }
   }
 };
