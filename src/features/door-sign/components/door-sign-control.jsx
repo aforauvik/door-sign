@@ -710,7 +710,7 @@ export function DoorSignControl({
 						editingPreset.color
 					}
 					isLight={isLight}
-					onSave={(subtext, updatedTitle, updatedColor) => {
+					onSave={(subtext, updatedTitle, updatedColor, updatedIcon) => {
 						if (editingPreset.id === "available") {
 							const currentOverrides = state.presetsOverrides || {};
 							const newOverrides = {
@@ -725,7 +725,7 @@ export function DoorSignControl({
 						} else if (editingPreset.isCustom && updatedTitle) {
 							const currentCustom = state.customPresets || [];
 							const newCustom = currentCustom.map((p) =>
-								p.id === editingPreset.id ? {...p, label: updatedTitle, color: updatedColor || p.color} : p,
+								p.id === editingPreset.id ? {...p, label: updatedTitle, color: updatedColor || p.color, icon: updatedIcon || p.icon} : p,
 							);
 							const currentOverrides = state.presetsOverrides || {};
 							const newOverrides = {
@@ -1345,14 +1345,14 @@ export function DoorSignControl({
 					isOpen={isAddPresetOpen}
 					onClose={() => setIsAddPresetOpen(false)}
 					isLight={isLight}
-					onSave={({label, defaultSubText, color}) => {
+					onSave={({label, defaultSubText, color, icon}) => {
 						const newId = `custom-${Date.now()}`;
 						const newPreset = {
 							id: newId,
 							label,
 							defaultSubText,
 							color: color || "green",
-							icon: "Clock",
+							icon: icon || "Clock",
 							isCustom: true,
 						};
 						const currentCustom = state.customPresets || [];
@@ -1524,12 +1524,14 @@ function PresetEditDialog({
 	const [title, setTitle] = useState(initialTitle || preset?.label || "");
 	const [subtext, setSubtext] = useState(initialSubtext || "");
 	const [color, setColor] = useState(getNormalizedColor(initialColor || preset?.color));
+	const [selectedIconName, setSelectedIconName] = useState(preset?.icon || "Clock");
 	const [error, setError] = useState("");
 
 	useEffect(() => {
 		setTitle(initialTitle || preset?.label || "");
 		setSubtext(initialSubtext || "");
 		setColor(getNormalizedColor(initialColor || preset?.color));
+		setSelectedIconName(preset?.icon || "Clock");
 		setError("");
 	}, [preset, initialTitle, initialSubtext, initialColor]);
 
@@ -1549,7 +1551,7 @@ function PresetEditDialog({
 			setError("Subtext must be 75 characters or less.");
 			return;
 		}
-		onSave(subtext, trimmedTitle, color);
+		onSave(subtext, trimmedTitle, color, selectedIconName);
 		onClose();
 	};
 
@@ -1661,6 +1663,51 @@ function PresetEditDialog({
 							</div>
 						</div>
 					)}
+
+					{preset?.isCustom && (
+						<div className="space-y-2">
+							<label className={modalLabelClass}>Preset Icon</label>
+							<div className="flex items-center gap-3.5 mt-1 flex-wrap">
+								{[
+									{ name: "Laptop", icon: Icons.Laptop },
+									{ name: "Users", icon: Icons.Users },
+									{ name: "Video", icon: Icons.Video },
+									{ name: "Mic", icon: Icons.Mic },
+									{ name: "MinusCircle", icon: Icons.MinusCircle },
+									{ name: "Coffee", icon: Icons.Coffee },
+									{ name: "Phone", icon: Icons.Phone },
+									{ name: "Headphones", icon: Icons.Headphones },
+									{ name: "Clock", icon: Icons.Clock },
+									{ name: "BookOpen", icon: Icons.BookOpen },
+									{ name: "GraduationCap", icon: Icons.GraduationCap },
+									{ name: "Tv", icon: Icons.Tv },
+									{ name: "Briefcase", icon: Icons.Briefcase },
+									{ name: "Code2", icon: Icons.Code2 },
+								].map((item) => {
+									const IconComponent = item.icon;
+									return (
+										<button
+											key={item.name}
+											type="button"
+											onClick={() => setSelectedIconName(item.name)}
+											className={`h-9 w-9 rounded-full border flex items-center justify-center transition-all cursor-pointer ${
+												selectedIconName === item.name
+													? isLight
+														? "bg-zinc-950 text-white border-zinc-950 shadow-sm scale-105"
+														: "bg-white text-zinc-950 border-white shadow-md scale-105"
+													: isLight
+														? "bg-zinc-50 border-zinc-200 text-zinc-650 hover:bg-zinc-100 hover:text-zinc-900"
+														: "bg-zinc-950 border-zinc-800 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"
+											}`}
+											title={item.name}
+										>
+											<IconComponent className="h-4 w-4" />
+										</button>
+									);
+								})}
+							</div>
+						</div>
+					)}
 				</div>
 
 				<DialogFooter
@@ -1709,6 +1756,7 @@ function AddPresetDialog({isOpen, onClose, isLight, onSave}) {
 	const [title, setTitle] = useState("");
 	const [subtext, setSubtext] = useState("");
 	const [color, setColor] = useState("green");
+	const [selectedIconName, setSelectedIconName] = useState("Clock");
 	const [error, setError] = useState("");
 
 	useEffect(() => {
@@ -1716,6 +1764,7 @@ function AddPresetDialog({isOpen, onClose, isLight, onSave}) {
 			setTitle("");
 			setSubtext("");
 			setColor("green");
+			setSelectedIconName("Clock");
 			setError("");
 		}
 	}, [isOpen]);
@@ -1738,6 +1787,7 @@ function AddPresetDialog({isOpen, onClose, isLight, onSave}) {
 			label: trimmedTitle,
 			defaultSubText: subtext.trim() || "Please do not disturb.",
 			color,
+			icon: selectedIconName,
 		});
 		onClose();
 	};
@@ -1841,6 +1891,49 @@ function AddPresetDialog({isOpen, onClose, isLight, onSave}) {
 									)}
 								</button>
 							))}
+						</div>
+					</div>
+
+					<div className="space-y-2">
+						<label className={modalLabelClass}>Preset Icon</label>
+						<div className="flex items-center gap-3.5 mt-1 flex-wrap">
+							{[
+								{ name: "Laptop", icon: Icons.Laptop },
+								{ name: "Users", icon: Icons.Users },
+								{ name: "Video", icon: Icons.Video },
+								{ name: "Mic", icon: Icons.Mic },
+								{ name: "MinusCircle", icon: Icons.MinusCircle },
+								{ name: "Coffee", icon: Icons.Coffee },
+								{ name: "Phone", icon: Icons.Phone },
+								{ name: "Headphones", icon: Icons.Headphones },
+								{ name: "Clock", icon: Icons.Clock },
+								{ name: "BookOpen", icon: Icons.BookOpen },
+								{ name: "GraduationCap", icon: Icons.GraduationCap },
+								{ name: "Tv", icon: Icons.Tv },
+								{ name: "Briefcase", icon: Icons.Briefcase },
+								{ name: "Code2", icon: Icons.Code2 },
+							].map((item) => {
+								const IconComponent = item.icon;
+								return (
+									<button
+										key={item.name}
+										type="button"
+										onClick={() => setSelectedIconName(item.name)}
+										className={`h-9 w-9 rounded-full border flex items-center justify-center transition-all cursor-pointer ${
+											selectedIconName === item.name
+												? isLight
+													? "bg-zinc-950 text-white border-zinc-950 shadow-sm scale-105"
+													: "bg-white text-zinc-950 border-white shadow-md scale-105"
+												: isLight
+													? "bg-zinc-50 border-zinc-200 text-zinc-650 hover:bg-zinc-100 hover:text-zinc-900"
+													: "bg-zinc-950 border-zinc-800 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"
+										}`}
+										title={item.name}
+									>
+										<IconComponent className="h-4 w-4" />
+									</button>
+								);
+							})}
 						</div>
 					</div>
 				</div>
