@@ -254,6 +254,7 @@ export function useDoorSign(userId = "default") {
 				...preset,
 				label: override.title || preset.label,
 				defaultSubText: override.subtext || preset.defaultSubText,
+				color: override.color || preset.color,
 			};
 		}
 		return preset;

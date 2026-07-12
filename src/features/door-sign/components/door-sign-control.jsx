@@ -22,6 +22,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import {COLOR_THEMES} from "../constants/color-themes";
 
 // Dynamic Icon Component Loader
 function StatusIcon({name, className}) {
@@ -591,13 +592,25 @@ export function DoorSignControl({
 						{presets.map((preset) => {
 							const isActive = selectedId === preset.id;
 
+							const presetColor = preset.color || "emerald";
+							const themeConfig = COLOR_THEMES[presetColor]?.[isLight ? "light" : "dark"] || COLOR_THEMES.emerald[isLight ? "light" : "dark"];
+
+							// Active Card Classes mapping
+							const activeCardBorder = themeConfig.activeCardBorder;
+							const activeIconClass = themeConfig.activeIcon;
+							const activeMoreBtnClass = themeConfig.activeMoreBtn;
+							const activeBadgeClass = themeConfig.activeBadge;
+							const activeBadgeSubtextClass = themeConfig.activeBadgeSubtext;
+							const activePulseClass = themeConfig.pulseBg;
+							const activeTitleClass = themeConfig.activeTitle;
+
 							return (
 								<Card
 									key={preset.id}
 									onClick={() => handleStatusSelect(preset.id)}
 									className={`relative cursor-pointer rounded-2xl border flex flex-col justify-between p-4 overflow-hidden select-none h-[160px] transition-all duration-200 ${
 										isActive
-											? "border-emerald-500 bg-emerald-500/5 ring-1 ring-emerald-500/20"
+											? activeCardBorder
 											: isLight
 												? "border-zinc-100 bg-white hover:border-zinc-200"
 												: "border-zinc-800 bg-zinc-900/40 hover:border-zinc-700"
@@ -607,7 +620,7 @@ export function DoorSignControl({
 									<div
 										className={`p-2 rounded-lg w-fit transition-colors ${
 											isActive
-												? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/15"
+												? activeIconClass
 												: isLight
 													? "bg-zinc-100 text-zinc-500 border border-zinc-200"
 													: "bg-zinc-950 text-zinc-400 border border-zinc-900"
@@ -626,7 +639,7 @@ export function DoorSignControl({
 										}}
 										className={`absolute top-3 right-3 h-6 w-6 rounded-md transition-all ${
 											isActive
-												? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20"
+												? activeMoreBtnClass
 												: isLight
 													? "bg-zinc-50 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 border border-zinc-200"
 													: "bg-zinc-950 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300 border border-zinc-900"
@@ -638,11 +651,11 @@ export function DoorSignControl({
 									{/* Bottom-left: Stacked Title & Subtitle */}
 									<div className="flex flex-col text-left gap-1 mt-auto">
 										{isActive && (
-											<span className="text-[10px] uppercase font-bold tracking-wider text-emerald-500 flex items-center gap-1.5 mb-0.5 flex-wrap">
-												<span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+											<span className={`text-[10px] uppercase font-bold tracking-wider ${activeBadgeClass} flex items-center gap-1.5 mb-0.5 flex-wrap`}>
+												<span className={`h-1.5 w-1.5 rounded-full ${activePulseClass} animate-pulse`} />
 												Active
 												{state.finishTime && preset.id !== "available" && (
-													<span className="normal-case font-semibold text-emerald-600 dark:text-emerald-400/90 ml-1">
+													<span className={`normal-case font-semibold ${activeBadgeSubtextClass} ml-1`}>
 														• Until {state.finishTime}
 													</span>
 												)}
@@ -661,9 +674,7 @@ export function DoorSignControl({
 										<span
 											className={`font-semibold text-sm leading-tight transition-colors ${
 												isActive
-													? isLight
-														? "text-emerald-700 font-bold"
-														: "text-white font-bold"
+													? activeTitleClass
 													: isLight
 														? "text-zinc-800"
 														: "text-zinc-200"
@@ -694,8 +705,12 @@ export function DoorSignControl({
 						editingPreset.label
 					}
 					initialSubtext={state.presetsOverrides?.[editingPreset.id]?.subtext}
+					initialColor={
+						state.presetsOverrides?.[editingPreset.id]?.color ||
+						editingPreset.color
+					}
 					isLight={isLight}
-					onSave={(subtext, updatedTitle) => {
+					onSave={(subtext, updatedTitle, updatedColor) => {
 						if (editingPreset.id === "available") {
 							const currentOverrides = state.presetsOverrides || {};
 							const newOverrides = {
@@ -703,13 +718,14 @@ export function DoorSignControl({
 								[editingPreset.id]: {
 									...currentOverrides[editingPreset.id],
 									subtext,
+									color: updatedColor,
 								},
 							};
 							updateSettings({presetsOverrides: newOverrides});
 						} else if (editingPreset.isCustom && updatedTitle) {
 							const currentCustom = state.customPresets || [];
 							const newCustom = currentCustom.map((p) =>
-								p.id === editingPreset.id ? {...p, label: updatedTitle} : p,
+								p.id === editingPreset.id ? {...p, label: updatedTitle, color: updatedColor || p.color} : p,
 							);
 							const currentOverrides = state.presetsOverrides || {};
 							const newOverrides = {
@@ -718,6 +734,7 @@ export function DoorSignControl({
 									...currentOverrides[editingPreset.id],
 									title: updatedTitle,
 									subtext,
+									color: updatedColor,
 								},
 							};
 							updateSettings({
@@ -732,6 +749,7 @@ export function DoorSignControl({
 									...currentOverrides[editingPreset.id],
 									title: updatedTitle,
 									subtext,
+									color: updatedColor,
 								},
 							};
 							updateSettings({presetsOverrides: newOverrides});
@@ -1327,12 +1345,13 @@ export function DoorSignControl({
 					isOpen={isAddPresetOpen}
 					onClose={() => setIsAddPresetOpen(false)}
 					isLight={isLight}
-					onSave={({label, defaultSubText}) => {
+					onSave={({label, defaultSubText, color}) => {
 						const newId = `custom-${Date.now()}`;
 						const newPreset = {
 							id: newId,
 							label,
 							defaultSubText,
+							color: color || "green",
 							icon: "Clock",
 							isCustom: true,
 						};
@@ -1490,19 +1509,29 @@ function PresetEditDialog({
 	preset,
 	initialTitle,
 	initialSubtext,
+	initialColor,
 	isLight,
 	onSave,
 	onDelete,
 }) {
+	const getNormalizedColor = (c) => {
+		if (c === "emerald") return "green";
+		if (c === "amber") return "orange";
+		if (c === "rose") return "red";
+		return c || "green";
+	};
+
 	const [title, setTitle] = useState(initialTitle || preset?.label || "");
 	const [subtext, setSubtext] = useState(initialSubtext || "");
+	const [color, setColor] = useState(getNormalizedColor(initialColor || preset?.color));
 	const [error, setError] = useState("");
 
 	useEffect(() => {
 		setTitle(initialTitle || preset?.label || "");
 		setSubtext(initialSubtext || "");
+		setColor(getNormalizedColor(initialColor || preset?.color));
 		setError("");
-	}, [preset, initialTitle, initialSubtext]);
+	}, [preset, initialTitle, initialSubtext, initialColor]);
 
 	const handleSave = () => {
 		const trimmedTitle = title.trim();
@@ -1520,7 +1549,7 @@ function PresetEditDialog({
 			setError("Subtext must be 75 characters or less.");
 			return;
 		}
-		onSave(subtext, trimmedTitle);
+		onSave(subtext, trimmedTitle, color);
 		onClose();
 	};
 
@@ -1602,6 +1631,36 @@ function PresetEditDialog({
 							className={inputClass}
 						/>
 					</div>
+
+					{preset?.id !== "available" && (
+						<div className="space-y-2">
+							<label className={modalLabelClass}>Color Theme</label>
+							<div className="flex items-center gap-3.5 mt-1">
+								{[
+									{ name: "green", value: "green", bg: "bg-emerald-500", ring: "ring-emerald-500/30" },
+									{ name: "orange", value: "orange", bg: "bg-amber-500", ring: "ring-amber-500/30" },
+									{ name: "blue", value: "blue", bg: "bg-blue-500", ring: "ring-blue-500/30" },
+									{ name: "red", value: "red", bg: "bg-red-500", ring: "ring-red-500/30" }
+								].map((item) => (
+									<button
+										key={item.value}
+										type="button"
+										onClick={() => setColor(item.value)}
+										className={`h-7 w-7 rounded-full ${item.bg} transition-all duration-200 cursor-pointer relative flex items-center justify-center ${
+											color === item.value 
+												? `ring-4 ${item.ring} scale-110 shadow-md` 
+												: "opacity-80 hover:opacity-100 hover:scale-105"
+										}`}
+										title={`Select ${item.name}`}
+									>
+										{color === item.value && (
+											<span className="h-2 w-2 rounded-full bg-white shadow-xs" />
+										)}
+									</button>
+								))}
+							</div>
+						</div>
+					)}
 				</div>
 
 				<DialogFooter
@@ -1649,12 +1708,14 @@ function PresetEditDialog({
 function AddPresetDialog({isOpen, onClose, isLight, onSave}) {
 	const [title, setTitle] = useState("");
 	const [subtext, setSubtext] = useState("");
+	const [color, setColor] = useState("green");
 	const [error, setError] = useState("");
 
 	useEffect(() => {
 		if (isOpen) {
 			setTitle("");
 			setSubtext("");
+			setColor("green");
 			setError("");
 		}
 	}, [isOpen]);
@@ -1676,6 +1737,7 @@ function AddPresetDialog({isOpen, onClose, isLight, onSave}) {
 		onSave({
 			label: trimmedTitle,
 			defaultSubText: subtext.trim() || "Please do not disturb.",
+			color,
 		});
 		onClose();
 	};
@@ -1752,6 +1814,34 @@ function AddPresetDialog({isOpen, onClose, isLight, onSave}) {
 							placeholder="e.g. Having lunch. Back soon!"
 							className={inputClass}
 						/>
+					</div>
+
+					<div className="space-y-2">
+						<label className={modalLabelClass}>Color Theme</label>
+						<div className="flex items-center gap-3.5 mt-1">
+							{[
+								{ name: "green", value: "green", bg: "bg-emerald-500", ring: "ring-emerald-500/30" },
+								{ name: "orange", value: "orange", bg: "bg-amber-500", ring: "ring-amber-500/30" },
+								{ name: "blue", value: "blue", bg: "bg-blue-500", ring: "ring-blue-500/30" },
+								{ name: "red", value: "red", bg: "bg-red-500", ring: "ring-red-500/30" }
+							].map((item) => (
+								<button
+									key={item.value}
+									type="button"
+									onClick={() => setColor(item.value)}
+									className={`h-7 w-7 rounded-full ${item.bg} transition-all duration-200 cursor-pointer relative flex items-center justify-center ${
+										color === item.value 
+											? `ring-4 ${item.ring} scale-110 shadow-md` 
+											: "opacity-80 hover:opacity-100 hover:scale-105"
+									}`}
+									title={`Select ${item.name}`}
+								>
+									{color === item.value && (
+										<span className="h-2 w-2 rounded-full bg-white shadow-xs" />
+									)}
+								</button>
+							))}
+						</div>
 					</div>
 				</div>
 

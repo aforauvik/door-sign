@@ -5,6 +5,7 @@ import Image from "next/image";
 import * as Icons from "lucide-react";
 import {Button} from "@/components/ui/button";
 import NoSleep from "nosleep.js";
+import {COLOR_THEMES} from "../constants/color-themes";
 
 export function DoorSignDisplay({
 	state,
@@ -176,19 +177,20 @@ export function DoorSignDisplay({
 	let valueColorClass = "";
 	let settingsBtnClass = "";
 
+	const color = currentPreset.color || "emerald";
+	const themeConfig = COLOR_THEMES[color]?.[isLight ? "light" : "dark"] || COLOR_THEMES.emerald[isLight ? "light" : "dark"];
+
 	if (isLight) {
-		containerClass = isAvailable
-			? "bg-emerald-50 text-black"
-			: "bg-red-100 text-black";
+		containerClass = `${themeConfig.bg} text-black`;
 		clockClass = "text-black";
 		dateClass = "text-black";
 		subTextClass = "text-black";
-		cardBorderClass = isAvailable ? "border-emerald-200" : "border-red-200";
-		labelClass = isAvailable ? "text-emerald-600" : "text-red-600";
+		cardBorderClass = themeConfig.border;
+		labelClass = themeConfig.text;
 		endsAroundClass = "text-black";
-		timerIconClass = "text-red-500";
-		valueColorClass = isAvailable ? "text-emerald-600" : "text-red-600";
-		settingsBtnClass = `bg-white/60 text-zinc-600 border ${isAvailable ? "border-emerald-200/80" : "border-red-200/80"} hover:bg-white hover:text-zinc-900`;
+		timerIconClass = themeConfig.timer;
+		valueColorClass = themeConfig.text;
+		settingsBtnClass = `bg-white/60 text-zinc-600 border ${themeConfig.border}/80 hover:bg-white hover:text-zinc-900`;
 	} else {
 		// Dark Mode: Premium dark background with readable elements
 		containerClass = "bg-zinc-950 text-zinc-100";
@@ -196,13 +198,16 @@ export function DoorSignDisplay({
 		dateClass = "text-zinc-400";
 		subTextClass = "text-zinc-300";
 		cardBorderClass = "border-zinc-900";
-		labelClass = isAvailable ? "text-emerald-400" : "text-red-500";
+		labelClass = themeConfig.text;
 		endsAroundClass = "text-zinc-300";
-		timerIconClass = isAvailable ? "text-emerald-400" : "text-red-500";
-		valueColorClass = isAvailable ? "text-emerald-400" : "text-red-500";
+		timerIconClass = themeConfig.timer;
+		valueColorClass = themeConfig.text;
 		settingsBtnClass =
 			"bg-zinc-900/60 text-zinc-400 border border-zinc-800/85 hover:bg-zinc-800 hover:text-zinc-200";
 	}
+
+	const pulseBgClass = themeConfig.pulseBg;
+	const pulsePingClass = themeConfig.pulsePing;
 
 	const computedSubText =
 		state.presetsOverrides?.[statusId]?.subtext || customText || defaultSubText;
@@ -260,11 +265,11 @@ export function DoorSignDisplay({
 				{/* Status Pulse */}
 				<div className="relative flex h-8 w-8 mb-6">
 					<span
-						className={`animate-ping absolute inline-flex h-full w-full rounded-full ${isAvailable ? "bg-emerald-400" : "bg-red-400"} opacity-75`}
+						className={`animate-ping absolute inline-flex h-full w-full rounded-full ${pulsePingClass} opacity-75`}
 						style={{animationDuration: "2s"}}
 					></span>
 					<span
-						className={`relative inline-flex rounded-full h-8 w-8 ${isAvailable ? "bg-emerald-600" : "bg-red-600"}`}
+						className={`relative inline-flex rounded-full h-8 w-8 ${pulseBgClass}`}
 					></span>
 				</div>
 

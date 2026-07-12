@@ -250,8 +250,29 @@ export function LoginForm({className, googleClientId, ...props}) {
 						</Button>
 					</div>
 
-					<div className="text-center text-xs text-zinc-550 mt-4">
+					<div className="text-center text-xs text-zinc-500 mt-4">
 						New here? No signup needed — just click above to sign in.
+					</div>
+
+					<div className="text-center text-[11px] text-zinc-500 mt-3 leading-normal px-2">
+						By signing in, you agree to our{" "}
+						<a
+							href="https://knocklater.com/terms"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="underline hover:text-zinc-300 transition-colors"
+						>
+							Terms of Service
+						</a>{" "}
+						and{" "}
+						<a
+							href="https://knocklater.com/"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="underline hover:text-zinc-300 transition-colors"
+						>
+							Privacy Policy
+						</a>.
 					</div>
 				</CardContent>
 			</Card>
