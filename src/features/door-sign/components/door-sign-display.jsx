@@ -7,6 +7,12 @@ import {Button} from "@/components/ui/button";
 import NoSleep from "nosleep.js";
 import {COLOR_THEMES} from "../constants/color-themes";
 
+function StatusIcon({name, className}) {
+	const IconComponent = Icons[name];
+	if (!IconComponent) return <Icons.HelpCircle className={className} />;
+	return <IconComponent className={className} />;
+}
+
 export function DoorSignDisplay({
 	state,
 	currentPreset,
@@ -262,15 +268,17 @@ export function DoorSignDisplay({
 
 			{/* Main Status Display Area */}
 			<main className="z-10 flex-1 flex flex-col items-start justify-center w-full ml-0 mr-auto my-6">
-				{/* Status Pulse */}
-				<div className="relative flex h-8 w-8 mb-6">
+				{/* Active Status Icon with Pulse Ring */}
+				<div className="relative flex items-center justify-center h-16 w-16 mb-8">
 					<span
-						className={`animate-ping absolute inline-flex h-full w-full rounded-full ${pulsePingClass} opacity-75`}
-						style={{animationDuration: "2s"}}
+						className={`animate-ping absolute inline-flex h-full w-full rounded-2xl ${pulsePingClass} opacity-25`}
+						style={{animationDuration: "2.5s"}}
 					></span>
-					<span
-						className={`relative inline-flex rounded-full h-8 w-8 ${pulseBgClass}`}
-					></span>
+					<div
+						className={`relative inline-flex items-center justify-center rounded-2xl h-16 w-16 ${themeConfig.activeIcon || "bg-zinc-800 text-white"} border ${themeConfig.activeIcon ? "" : "border-zinc-700"} shadow-lg`}
+					>
+						<StatusIcon name={currentPreset?.icon} className="h-8 w-8" />
+					</div>
 				</div>
 
 				{/* Status Label */}
