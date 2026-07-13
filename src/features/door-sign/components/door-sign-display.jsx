@@ -307,7 +307,7 @@ export function DoorSignDisplay({
 						style={{animationDuration: "2.5s"}}
 					></span>
 					<div
-						className={`relative inline-flex items-center justify-center rounded-2xl h-16 w-16 ${themeConfig.activeIcon || "bg-zinc-800 text-white"} border ${themeConfig.activeIcon ? "" : "border-zinc-700"} shadow-lg`}
+						className={`relative inline-flex items-center justify-center rounded-2xl h-16 w-16 ${themeConfig.activeIcon || "bg-zinc-800 text-white"} border ${themeConfig.activeIcon ? "" : "border-zinc-700"}`}
 					>
 						<StatusIcon name={currentPreset?.icon} className="h-8 w-8" />
 					</div>
