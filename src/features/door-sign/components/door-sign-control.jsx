@@ -3,7 +3,8 @@
 
 import {useState, useEffect, useRef} from "react";
 import Image from "next/image";
-import * as Icons from "lucide-react";
+import * as LucideIcons from "lucide-react";
+import * as TablerIcons from "@tabler/icons-react";
 import {Button} from "@/components/ui/button";
 import {Card, CardContent} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
@@ -23,6 +24,40 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import {COLOR_THEMES} from "../constants/color-themes";
+
+const tablerOverrides = {
+	CheckCircle2: TablerIcons.IconCircleCheck,
+	MinusCircle: TablerIcons.IconCircleMinus,
+	Code2: TablerIcons.IconCode,
+	MoreHorizontal: TablerIcons.IconDots,
+	AlertTriangle: TablerIcons.IconAlertTriangle,
+	DoorOpen: LucideIcons.DoorOpen,
+	DoorClosed: LucideIcons.DoorClosed,
+	Expand: TablerIcons.IconArrowsMaximize,
+	HelpCircle: TablerIcons.IconHelpCircle || TablerIcons.IconHelp,
+	Laptop: TablerIcons.IconDeviceLaptop,
+	GraduationCap: TablerIcons.IconSchool,
+	BookOpen: TablerIcons.IconBook,
+	Unlock: TablerIcons.IconLockOpen,
+	Tv: TablerIcons.IconDeviceTv,
+	Mic: TablerIcons.IconMicrophone,
+};
+
+const Icons = new Proxy(
+	{},
+	{
+		get(target, prop) {
+			if (tablerOverrides[prop]) {
+				return tablerOverrides[prop];
+			}
+			const tablerName = `Icon${prop}`;
+			if (TablerIcons[tablerName]) {
+				return TablerIcons[tablerName];
+			}
+			return TablerIcons.IconHelpCircle || TablerIcons.IconHelp;
+		},
+	},
+);
 
 // Dynamic Icon Component Loader
 function StatusIcon({name, className}) {
@@ -593,7 +628,9 @@ export function DoorSignControl({
 							const isActive = selectedId === preset.id;
 
 							const presetColor = preset.color || "emerald";
-							const themeConfig = COLOR_THEMES[presetColor]?.[isLight ? "light" : "dark"] || COLOR_THEMES.emerald[isLight ? "light" : "dark"];
+							const themeConfig =
+								COLOR_THEMES[presetColor]?.[isLight ? "light" : "dark"] ||
+								COLOR_THEMES.emerald[isLight ? "light" : "dark"];
 
 							// Active Card Classes mapping
 							const activeCardBorder = themeConfig.activeCardBorder;
@@ -651,11 +688,17 @@ export function DoorSignControl({
 									{/* Bottom-left: Stacked Title & Subtitle */}
 									<div className="flex flex-col text-left gap-1 mt-auto">
 										{isActive && (
-											<span className={`text-[10px] uppercase font-bold tracking-wider ${activeBadgeClass} flex items-center gap-1.5 mb-0.5 flex-wrap`}>
-												<span className={`h-1.5 w-1.5 rounded-full ${activePulseClass} animate-pulse`} />
+											<span
+												className={`text-[10px] uppercase font-bold tracking-wider ${activeBadgeClass} flex items-center gap-1.5 mb-0.5 flex-wrap`}
+											>
+												<span
+													className={`h-1.5 w-1.5 rounded-full ${activePulseClass} animate-pulse`}
+												/>
 												Active
 												{state.finishTime && preset.id !== "available" && (
-													<span className={`normal-case font-semibold ${activeBadgeSubtextClass} ml-1`}>
+													<span
+														className={`normal-case font-semibold ${activeBadgeSubtextClass} ml-1`}
+													>
 														• Until {state.finishTime}
 													</span>
 												)}
@@ -725,7 +768,14 @@ export function DoorSignControl({
 						} else if (editingPreset.isCustom && updatedTitle) {
 							const currentCustom = state.customPresets || [];
 							const newCustom = currentCustom.map((p) =>
-								p.id === editingPreset.id ? {...p, label: updatedTitle, color: updatedColor || p.color, icon: updatedIcon || p.icon} : p,
+								p.id === editingPreset.id
+									? {
+											...p,
+											label: updatedTitle,
+											color: updatedColor || p.color,
+											icon: updatedIcon || p.icon,
+										}
+									: p,
 							);
 							const currentOverrides = state.presetsOverrides || {};
 							const newOverrides = {
@@ -1523,8 +1573,12 @@ function PresetEditDialog({
 
 	const [title, setTitle] = useState(initialTitle || preset?.label || "");
 	const [subtext, setSubtext] = useState(initialSubtext || "");
-	const [color, setColor] = useState(getNormalizedColor(initialColor || preset?.color));
-	const [selectedIconName, setSelectedIconName] = useState(preset?.icon || "Clock");
+	const [color, setColor] = useState(
+		getNormalizedColor(initialColor || preset?.color),
+	);
+	const [selectedIconName, setSelectedIconName] = useState(
+		preset?.icon || "Clock",
+	);
 	const [error, setError] = useState("");
 
 	useEffect(() => {
@@ -1639,18 +1693,38 @@ function PresetEditDialog({
 							<label className={modalLabelClass}>Color Theme</label>
 							<div className="flex items-center gap-3.5 mt-1">
 								{[
-									{ name: "green", value: "green", bg: "bg-emerald-500", ring: "ring-emerald-500/30" },
-									{ name: "orange", value: "orange", bg: "bg-amber-500", ring: "ring-amber-500/30" },
-									{ name: "blue", value: "blue", bg: "bg-blue-500", ring: "ring-blue-500/30" },
-									{ name: "red", value: "red", bg: "bg-red-500", ring: "ring-red-500/30" }
+									{
+										name: "green",
+										value: "green",
+										bg: "bg-emerald-500",
+										ring: "ring-emerald-500/30",
+									},
+									{
+										name: "orange",
+										value: "orange",
+										bg: "bg-amber-500",
+										ring: "ring-amber-500/30",
+									},
+									{
+										name: "blue",
+										value: "blue",
+										bg: "bg-blue-500",
+										ring: "ring-blue-500/30",
+									},
+									{
+										name: "red",
+										value: "red",
+										bg: "bg-red-500",
+										ring: "ring-red-500/30",
+									},
 								].map((item) => (
 									<button
 										key={item.value}
 										type="button"
 										onClick={() => setColor(item.value)}
 										className={`h-7 w-7 rounded-full ${item.bg} transition-all duration-200 cursor-pointer relative flex items-center justify-center ${
-											color === item.value 
-												? `ring-4 ${item.ring} scale-110 shadow-md` 
+											color === item.value
+												? `ring-4 ${item.ring} scale-110 shadow-md`
 												: "opacity-80 hover:opacity-100 hover:scale-105"
 										}`}
 										title={`Select ${item.name}`}
@@ -1669,20 +1743,20 @@ function PresetEditDialog({
 							<label className={modalLabelClass}>Preset Icon</label>
 							<div className="flex items-center gap-3.5 mt-1 flex-wrap">
 								{[
-									{ name: "Laptop", icon: Icons.Laptop },
-									{ name: "Users", icon: Icons.Users },
-									{ name: "Video", icon: Icons.Video },
-									{ name: "Mic", icon: Icons.Mic },
-									{ name: "MinusCircle", icon: Icons.MinusCircle },
-									{ name: "Coffee", icon: Icons.Coffee },
-									{ name: "Phone", icon: Icons.Phone },
-									{ name: "Headphones", icon: Icons.Headphones },
-									{ name: "Clock", icon: Icons.Clock },
-									{ name: "BookOpen", icon: Icons.BookOpen },
-									{ name: "GraduationCap", icon: Icons.GraduationCap },
-									{ name: "Tv", icon: Icons.Tv },
-									{ name: "Briefcase", icon: Icons.Briefcase },
-									{ name: "Code2", icon: Icons.Code2 },
+									{name: "Laptop", icon: Icons.Laptop},
+									{name: "Users", icon: Icons.Users},
+									{name: "Video", icon: Icons.Video},
+									{name: "Mic", icon: Icons.Mic},
+									{name: "MinusCircle", icon: Icons.MinusCircle},
+									{name: "Coffee", icon: Icons.Coffee},
+									{name: "Phone", icon: Icons.Phone},
+									{name: "Pray", icon: Icons.Pray},
+									{name: "Clock", icon: Icons.Clock},
+									{name: "BookOpen", icon: Icons.BookOpen},
+									{name: "GraduationCap", icon: Icons.GraduationCap},
+									{name: "Tv", icon: Icons.Tv},
+									{name: "Briefcase", icon: Icons.Briefcase},
+									{name: "Code2", icon: Icons.Code2},
 								].map((item) => {
 									const IconComponent = item.icon;
 									return (
@@ -1870,18 +1944,38 @@ function AddPresetDialog({isOpen, onClose, isLight, onSave}) {
 						<label className={modalLabelClass}>Color Theme</label>
 						<div className="flex items-center gap-3.5 mt-1">
 							{[
-								{ name: "green", value: "green", bg: "bg-emerald-500", ring: "ring-emerald-500/30" },
-								{ name: "orange", value: "orange", bg: "bg-amber-500", ring: "ring-amber-500/30" },
-								{ name: "blue", value: "blue", bg: "bg-blue-500", ring: "ring-blue-500/30" },
-								{ name: "red", value: "red", bg: "bg-red-500", ring: "ring-red-500/30" }
+								{
+									name: "green",
+									value: "green",
+									bg: "bg-emerald-500",
+									ring: "ring-emerald-500/30",
+								},
+								{
+									name: "orange",
+									value: "orange",
+									bg: "bg-amber-500",
+									ring: "ring-amber-500/30",
+								},
+								{
+									name: "blue",
+									value: "blue",
+									bg: "bg-blue-500",
+									ring: "ring-blue-500/30",
+								},
+								{
+									name: "red",
+									value: "red",
+									bg: "bg-red-500",
+									ring: "ring-red-500/30",
+								},
 							].map((item) => (
 								<button
 									key={item.value}
 									type="button"
 									onClick={() => setColor(item.value)}
 									className={`h-7 w-7 rounded-full ${item.bg} transition-all duration-200 cursor-pointer relative flex items-center justify-center ${
-										color === item.value 
-											? `ring-4 ${item.ring} scale-110 shadow-md` 
+										color === item.value
+											? `ring-4 ${item.ring} scale-110 shadow-md`
 											: "opacity-80 hover:opacity-100 hover:scale-105"
 									}`}
 									title={`Select ${item.name}`}
@@ -1898,20 +1992,20 @@ function AddPresetDialog({isOpen, onClose, isLight, onSave}) {
 						<label className={modalLabelClass}>Preset Icon</label>
 						<div className="flex items-center gap-3.5 mt-1 flex-wrap">
 							{[
-								{ name: "Laptop", icon: Icons.Laptop },
-								{ name: "Users", icon: Icons.Users },
-								{ name: "Video", icon: Icons.Video },
-								{ name: "Mic", icon: Icons.Mic },
-								{ name: "MinusCircle", icon: Icons.MinusCircle },
-								{ name: "Coffee", icon: Icons.Coffee },
-								{ name: "Phone", icon: Icons.Phone },
-								{ name: "Headphones", icon: Icons.Headphones },
-								{ name: "Clock", icon: Icons.Clock },
-								{ name: "BookOpen", icon: Icons.BookOpen },
-								{ name: "GraduationCap", icon: Icons.GraduationCap },
-								{ name: "Tv", icon: Icons.Tv },
-								{ name: "Briefcase", icon: Icons.Briefcase },
-								{ name: "Code2", icon: Icons.Code2 },
+								{name: "Laptop", icon: Icons.Laptop},
+								{name: "Users", icon: Icons.Users},
+								{name: "Video", icon: Icons.Video},
+								{name: "Mic", icon: Icons.Mic},
+								{name: "MinusCircle", icon: Icons.MinusCircle},
+								{name: "Coffee", icon: Icons.Coffee},
+								{name: "Phone", icon: Icons.Phone},
+								{name: "Pray", icon: Icons.Pray},
+								{name: "Clock", icon: Icons.Clock},
+								{name: "BookOpen", icon: Icons.BookOpen},
+								{name: "GraduationCap", icon: Icons.GraduationCap},
+								{name: "Tv", icon: Icons.Tv},
+								{name: "Briefcase", icon: Icons.Briefcase},
+								{name: "Code2", icon: Icons.Code2},
 							].map((item) => {
 								const IconComponent = item.icon;
 								return (

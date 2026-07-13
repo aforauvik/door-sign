@@ -2,10 +2,42 @@
 
 import {useState, useEffect} from "react";
 import Image from "next/image";
-import * as Icons from "lucide-react";
+import * as LucideIcons from "lucide-react";
+import * as TablerIcons from "@tabler/icons-react";
 import {Button} from "@/components/ui/button";
 import NoSleep from "nosleep.js";
 import {COLOR_THEMES} from "../constants/color-themes";
+
+const tablerOverrides = {
+	CheckCircle2: TablerIcons.IconCircleCheck,
+	MinusCircle: TablerIcons.IconCircleMinus,
+	Code2: TablerIcons.IconCode,
+	MoreHorizontal: TablerIcons.IconDots,
+	AlertTriangle: TablerIcons.IconAlertTriangle,
+	DoorOpen: LucideIcons.DoorOpen,
+	DoorClosed: LucideIcons.DoorClosed,
+	Expand: TablerIcons.IconMaximize,
+	HelpCircle: TablerIcons.IconHelpCircle || TablerIcons.IconHelp,
+	Laptop: TablerIcons.IconDeviceLaptop,
+	GraduationCap: TablerIcons.IconSchool,
+	BookOpen: TablerIcons.IconBook,
+	Unlock: TablerIcons.IconLockOpen,
+	Tv: TablerIcons.IconDeviceTv,
+	Mic: TablerIcons.IconMicrophone,
+};
+
+const Icons = new Proxy({}, {
+	get(target, prop) {
+		if (tablerOverrides[prop]) {
+			return tablerOverrides[prop];
+		}
+		const tablerName = `Icon${prop}`;
+		if (TablerIcons[tablerName]) {
+			return TablerIcons[tablerName];
+		}
+		return TablerIcons.IconHelpCircle || TablerIcons.IconHelp;
+	}
+});
 
 function StatusIcon({name, className}) {
 	const IconComponent = Icons[name];

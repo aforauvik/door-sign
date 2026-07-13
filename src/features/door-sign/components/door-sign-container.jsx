@@ -6,7 +6,8 @@ import {useDoorSign} from "../hooks/use-door-sign";
 import {DoorSignDisplay} from "./door-sign-display";
 import {DoorSignControl} from "./door-sign-control";
 import {PinDialog} from "./pin-dialog";
-import {Loader2} from "lucide-react";
+// import {Loader2} from "lucide-react";
+import {IconLoader2} from "@tabler/icons-react";
 import {signOutAction} from "../actions/auth-actions";
 
 export function DoorSignContainer({ userId, user }) {
@@ -51,7 +52,7 @@ export function DoorSignContainer({ userId, user }) {
 		return (
 			<div className="flex flex-col items-center justify-center min-h-screen bg-zinc-950 text-zinc-400">
 				<div className="p-8 rounded-3xl border border-zinc-900 bg-zinc-950 flex flex-col items-center gap-4 shadow-2xl">
-					<Loader2 className="h-10 w-10 text-emerald-500 animate-spin" />
+					<IconLoader2 className="h-10 w-10 text-emerald-500 animate-spin" />
 					<span className="text-sm font-semibold tracking-wider uppercase">
 						Loading...
 					</span>

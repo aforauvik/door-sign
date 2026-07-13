@@ -8,7 +8,8 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
-import {Delete, X} from "lucide-react";
+// import {Delete, X} from "lucide-react";
+import {IconBackspace} from "@tabler/icons-react";
 
 export function PinDialog({isOpen, onClose, onCorrectPin, savedPin, theme}) {
 	const [pinInput, setPinInput] = useState("");
@@ -145,7 +146,7 @@ export function PinDialog({isOpen, onClose, onCorrectPin, savedPin, theme}) {
 							onClick={handleBackspace}
 							className={secondaryBtnClass}
 						>
-							<Delete className="h-5 w-5" />
+							<IconBackspace className="h-5 w-5" />
 						</Button>
 					</div>
 				</div>
